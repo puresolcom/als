@@ -2,8 +2,8 @@
 
 namespace ALS\Modules\Option\Repositories;
 
+use ALS\Core\Repository\BaseRepository;
 use ALS\Modules\Option\Models\Option;
-use Prettus\Repository\Eloquent\BaseRepository;
 
 class OptionRepository extends BaseRepository
 {

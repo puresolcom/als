@@ -4,7 +4,7 @@
 $app->group([
     'middleware' => ['auth', 'role:manage-driver']
 ], function () use ($app){
-    $app->get('/{shipmentId}', 'ShipmentController@get');
+    $app->get('/', 'ShipmentController@list');
 });
 
 // Guest routes

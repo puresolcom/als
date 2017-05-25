@@ -2,7 +2,7 @@
 
 namespace ALS\Core\Authorization;
 
-use Illuminate\Database\Eloquent\Model;
+use ALS\Core\Eloquent\Model;
 use Laravel\Lumen\Application;
 
 /**

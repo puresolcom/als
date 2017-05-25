@@ -72,6 +72,7 @@ $app->routeMiddleware([
 | totally optional, so you are not required to uncomment this line.
 |
 */
+$app->register(\ALS\Providers\AppServiceProvider::class);
 $app->register(\ALS\Providers\AuthServiceProvider::class);
 $app->register(\ALS\Core\Authorization\AuthorizationServiceProvider::class);
 $app->register(\ALS\Modules\User\Providers\ModuleServiceProvider::class);

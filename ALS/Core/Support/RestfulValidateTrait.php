@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 
 trait RestfulValidateTrait
 {
-    public function validate(Request $request, array $rules, array $messages = [], array $customAttributes = [])
+    function validate(Request $request, array $rules, array $messages = [], array $customAttributes = [])
     {
         $validator = $this->getValidationFactory()->make($request->all(), $rules, $messages, $customAttributes);
 

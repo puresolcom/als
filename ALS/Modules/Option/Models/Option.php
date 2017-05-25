@@ -2,7 +2,7 @@
 
 namespace ALS\Modules\Option\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use ALS\Core\Eloquent\Model;
 
 class Option extends Model
 {

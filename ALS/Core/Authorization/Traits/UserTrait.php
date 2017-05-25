@@ -2,7 +2,7 @@
 
 namespace ALS\Core\Authorization\Traits;
 
-use Illuminate\Database\Eloquent\Model;
+use ALS\Core\Eloquent\Model;
 
 trait UserTrait
 {

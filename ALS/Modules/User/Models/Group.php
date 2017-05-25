@@ -2,7 +2,7 @@
 
 namespace ALS\Modules\User\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use ALS\Core\Eloquent\Model;
 
 class Group extends Model
 {

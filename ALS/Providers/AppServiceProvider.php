@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Providers;
+namespace ALS\Providers;
 
+use ALS\Core\Http\Request;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -13,6 +14,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        $this->app->singleton(Request::class, function (){
+            return Request::capture();
+        });
+
+        $this->app->alias(Request::class, 'request');
     }
 }

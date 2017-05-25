@@ -2,8 +2,8 @@
 
 namespace ALS\Modules\User\Repositories;
 
+use ALS\Core\Repository\BaseRepository;
 use ALS\Modules\User\Models\User;
-use Prettus\Repository\Eloquent\BaseRepository;
 
 class UserRepository extends BaseRepository
 {

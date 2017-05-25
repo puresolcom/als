@@ -2,7 +2,7 @@
 
 namespace ALS\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use ALS\Core\Eloquent\Model;
 
 class Transient Extends Model
 {

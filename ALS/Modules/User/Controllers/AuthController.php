@@ -8,7 +8,7 @@ use ALS\Modules\User\Repositories\UserRepository;
 use ALS\Repositories\TransientRepository;
 use Carbon\Carbon;
 use Firebase\JWT\JWT;
-use Illuminate\Http\Request;
+use ALS\Core\Http\Request;
 
 /**
  * Class AuthController
