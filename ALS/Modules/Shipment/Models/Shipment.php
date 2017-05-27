@@ -12,7 +12,7 @@ class Shipment extends Model
 
     protected $table = 'aw_shipment';
 
-    protected $guarded = [];
+    protected $guarded = [ ];
 
     public function driver()
     {

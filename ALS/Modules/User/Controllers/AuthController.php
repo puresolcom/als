@@ -66,7 +66,7 @@ class AuthController extends Controller
         }
 
         // Verify if password matches
-        if (! password_verify($request->input('password'), $userInstance->password)) {
+        if (!password_verify($request->input('password'), $userInstance->password)) {
             return $this->jsonResponse(null, 'Invalid login credentials', 400);
         }
 
@@ -100,7 +100,7 @@ class AuthController extends Controller
                     'value'      => $jwt,
                     'expired_at' => Carbon::now()->addSeconds($tokenExpirationPeriod),
                 ]);
-        } catch (\Exception $e) {
+        }catch (\Exception $e) {
             return $this->jsonResponse(null, 'Unable to log you in, please try again', 400, $e->getMessage());
         }
 
@@ -123,8 +123,8 @@ class AuthController extends Controller
 
         if ($logOutAll) {
             // Remove all user tokens/sessions
-            $this->transientRepo->deleteWhere(['key' => $currentLoggedInUser->id]);
-        } else {
+            $this->transientRepo->deleteWhere([ 'key' => $currentLoggedInUser->id ]);
+        }else {
             // Remove only current token/session
             $this->transientRepo->deleteWhere([
                     'key'   => $currentLoggedInUser->id,

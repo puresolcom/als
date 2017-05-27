@@ -10,5 +10,5 @@ class Transient Extends Model
 
     protected $table = 'aw_transient';
 
-    protected $guarded = [];
+    protected $guarded = [ ];
 }

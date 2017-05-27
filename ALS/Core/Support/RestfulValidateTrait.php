@@ -9,8 +9,8 @@ trait RestfulValidateTrait
     function validate(
         Request $request,
         array $rules,
-        array $messages = [],
-        array $customAttributes = []
+        array $messages = [ ],
+        array $customAttributes = [ ]
     ) {
         $validator = $this->getValidationFactory()->make($request->all(), $rules, $messages, $customAttributes);
 

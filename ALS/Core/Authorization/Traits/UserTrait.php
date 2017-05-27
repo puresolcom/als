@@ -20,15 +20,15 @@ trait UserTrait
             foreach ($name as $roleName) {
                 $hasRole = $this->hasRole($roleName);
 
-                if ($hasRole && ! $requireAll) {
+                if ($hasRole && !$requireAll) {
                     return true;
-                } elseif (! $hasRole && $requireAll) {
+                } elseif (!$hasRole && $requireAll) {
                     return false;
                 }
             }
 
             return $requireAll;
-        } else {
+        }else {
             foreach ($this->getRoles() as $role) {
                 if ($role->name == $name) {
                     return true;

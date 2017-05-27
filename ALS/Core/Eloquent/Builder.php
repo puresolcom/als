@@ -21,14 +21,14 @@ class Builder extends \Illuminate\Database\Eloquent\Builder
      */
     public function paginate(
         $perPage = null,
-        $columns = ['*'],
+        $columns = [ '*' ],
         $pageName = 'page',
         $page = null,
         $dataKey = 'data'
     ) {
-        $page = $page ? : Paginator::resolveCurrentPage($pageName);
+        $page = $page ?: Paginator::resolveCurrentPage($pageName);
 
-        $perPage = $perPage ? : $this->model->getPerPage();
+        $perPage = $perPage ?: $this->model->getPerPage();
 
         $results = ($total = $this->toBase()->getCountForPagination()) ? $this->forPage($page, $perPage)->get($columns) : $this->model->newCollection();
 
