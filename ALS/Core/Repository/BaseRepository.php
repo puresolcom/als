@@ -58,49 +58,15 @@ abstract class BaseRepository extends \Prettus\Repository\Eloquent\BaseRepositor
         $limit = null,
         $dataKey = 'data'
     ){
-        $results = $this->model;
-
-        // Preparing select columns
-        $fields = !empty($fields) ? $fields : ['*'];
-        if (is_array($fields)) {
-            $results = $results->select($fields);
-        }
-
-        // Preparing relations
-        if (is_array($relations)) {
-            foreach ($relations as $relation) {
-                $results = $results->with([
-                    $relation['relationName'] => function ($query) use ($relation){
-                        if (count($relation['relationFields']) > 0) {
-                            $fields = array_merge(['id'], $relation['relationFields']);
-                        }else {
-                            $fields = ['*'];
-                        }
-                        return $query->select($fields);
-                    }
-                ]);
-            }
-        }
-
-        // Preparing filters
-        if (is_array($filters)) {
-            foreach ($filters as $filter) {
-                $results = $this->interpretFilterSymbols($results, $filter);
-            }
-        }
-
-        // Preparing Sorting
-        if (is_array($sort)) {
-            foreach ($sort as $order) {
-                $results->orderBy($order['orderBy'], $order['direction']);
-            }
-        }
-
+        $model  = $this->model;
+        $select = $this->prepareColumns($fields, $model);
+        $with   = $this->prepareRelations($relations, $select);
+        $filter = $this->prepareFilters($filters, $with);
+        $sort   = $this->prepareSorting($sort, $filter);
         $this->resetModel();
+        return $this->paginateResult($limit, $dataKey, $sort);
 
-        // Paginate
-        $limit = is_null($limit) ? config('repository.pagination.limit', 20) : $limit;
-        return $this->parserResult($results->paginate($limit, ['*'], $pageName = 'page', $page = null, $dataKey));
+
     }
 
     /**
@@ -158,5 +124,98 @@ abstract class BaseRepository extends \Prettus\Repository\Eloquent\BaseRepositor
                 return $model->where($filter['field'], $filter['compare'], $filter['value']);
             }
         }
+    }
+
+    /**
+     * @param $fields
+     * @param $results
+     *
+     * @return mixed
+     */
+    protected function prepareColumns($fields, $results)
+    {
+        // Preparing select columns
+        $fields = !empty($fields) ? $fields : ['*'];
+        if (is_array($fields)) {
+            $results = $results->select($fields);
+            return $results;
+        }
+        return $results;
+    }
+
+    /**
+     * @param $relations
+     * @param $results
+     *
+     * @return mixed
+     */
+    protected function prepareRelations($relations, $results)
+    {
+        // Preparing relations
+        if (is_array($relations)) {
+            foreach ($relations as $relation) {
+                $results = $results->with([
+                    $relation['relationName'] => function ($query) use ($relation){
+                        if (count($relation['relationFields']) > 0) {
+                            $fields = array_merge(['id'], $relation['relationFields']);
+                        }else {
+                            $fields = ['*'];
+                        }
+                        return $query->select($fields);
+                    }
+                ]);
+            }
+            return $results;
+        }
+        return $results;
+    }
+
+    /**
+     * @param $filters
+     * @param $results
+     *
+     * @return bool|\Illuminate\Database\Eloquent\Builder
+     */
+    protected function prepareFilters($filters, $results)
+    {
+        // Preparing filters
+        if (is_array($filters)) {
+            foreach ($filters as $filter) {
+                $results = $this->interpretFilterSymbols($results, $filter);
+            }
+            return $results;
+        }
+        return $results;
+    }
+
+    /**
+     * @param $sort
+     * @param $results
+     *
+     * @return mixed;
+     */
+    protected function prepareSorting($sort, $results)
+    {
+        // Preparing Sorting
+        if (is_array($sort)) {
+            foreach ($sort as $order) {
+                $results->orderBy($order['orderBy'], $order['direction']);
+            }
+        }
+        return $results;
+    }
+
+    /**
+     * @param $limit
+     * @param $dataKey
+     * @param $results
+     *
+     * @return mixed
+     */
+    protected function paginateResult($limit, $dataKey, $results)
+    {
+        // Paginate
+        $limit = is_null($limit) ? config('repository.pagination.limit', 20) : $limit;
+        return $this->parserResult($results->paginate($limit, ['*'], $pageName = 'page', $page = null, $dataKey));
     }
 }
