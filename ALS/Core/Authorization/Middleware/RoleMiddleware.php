@@ -12,7 +12,9 @@ class RoleMiddleware
     {
         $roles = explode('|', $role);
         if (!app('authorization')->hasRole($roles)) {
-            return $this->jsonResponse(null, 'Unauthorized access to this resource', 400);
+            return $this->jsonResponse(
+                null, 'Unauthorized access to this resource', 400
+            );
         }
 
         return $next($request);

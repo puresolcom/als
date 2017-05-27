@@ -19,7 +19,8 @@ class Request extends \Illuminate\Http\Request
         }
         $fields = $this->get('fields');
 
-        return is_array($parsedFields = array_filter(explode(',', $fields))) ? $parsedFields : null;
+        return is_array($parsedFields = array_filter(explode(',', $fields)))
+            ? $parsedFields : null;
     }
 
     /**
@@ -60,8 +61,11 @@ class Request extends \Illuminate\Http\Request
             list($field, $compare, $value) = array_slice($filterFragments, 1);
 
             // One or multiple values
-            $value = (isset($filterFragments[5]) && $multiValues = explode('|',
-                    $filterFragments[5])) ? $multiValues : $value;
+            $value = (isset($filterFragments[5])
+                && $multiValues = explode(
+                    '|',
+                    $filterFragments[5]
+                )) ? $multiValues : $value;
 
             if (strpos($field, '.') !== false) {
                 $relational        = true;
@@ -83,6 +87,28 @@ class Request extends \Illuminate\Http\Request
     }
 
     /**
+     * Matches every filter string and converts it into fragments
+     *
+     * @param $filter
+     *
+     * @return array
+     */
+    protected function matchFilter($filter)
+    {
+        $filterFragments = [];
+        preg_match(
+            '/^([a-zA-Z0-9\-\_\.]+)(' . implode(
+                '|',
+                $this->comparisonSymbols
+            ) . '{1})(([a-zA-Z0-9\-\_\,]+)|\(([a-zA-Z0-9\-\_\,\|]+)\))$/',
+            $filter,
+            $filterFragments
+        );
+
+        return $filterFragments;
+    }
+
+    /**
      * Get Request sort fields
      *
      * @return array|null
@@ -95,24 +121,26 @@ class Request extends \Illuminate\Http\Request
         $sort       = $this->get('sort');
         $parsedSort = array_filter(explode(',', $sort));
 
-        $result = array_map(function ($sort){
+        $result = array_map(
+            function ($sort) {
 
-            $orderBy = null;
-            if (strpos($sort, '!', 0) === 0) {
-                $orderBy   = substr($sort, 1);
-                $direction = 'DESC';
-            }elseif (strpos($sort, ':') !== false) {
-                list($orderBy, $direction) = explode(':', $sort);
-            }else {
-                $orderBy   = $sort;
-                $direction = 'ASC';
-            }
+                $orderBy = null;
+                if (strpos($sort, '!', 0) === 0) {
+                    $orderBy   = substr($sort, 1);
+                    $direction = 'DESC';
+                } elseif (strpos($sort, ':') !== false) {
+                    list($orderBy, $direction) = explode(':', $sort);
+                } else {
+                    $orderBy   = $sort;
+                    $direction = 'ASC';
+                }
 
-            return [
-                'orderBy'   => $orderBy,
-                'direction' => $direction
-            ];
-        }, $parsedSort);
+                return [
+                    'orderBy'   => $orderBy,
+                    'direction' => $direction
+                ];
+            }, $parsedSort
+        );
 
         return $result;
     }
@@ -131,32 +159,37 @@ class Request extends \Illuminate\Http\Request
         $relations       = $this->get('with');
         $parsedRelations = array_filter(explode(',', $relations));
 
-        $result = array_map(function ($relation){
+        $result = array_map(
+            function ($relation) {
 
-            if (strpos($relation, '.') !== false) {
-                $relationFragments = explode('.', $relation);
-            }else {
-                $relationFragments[] = $relation;
-            }
-            $targetedRelationFragment = array_pop($relationFragments);
-            $matchedRelation          = [];
-            preg_match('/^([a-zA-Z\.\-\_]+)\((.+)\)$/', $targetedRelationFragment, $matchedRelation);
+                if (strpos($relation, '.') !== false) {
+                    $relationFragments = explode('.', $relation);
+                } else {
+                    $relationFragments[] = $relation;
+                }
+                $targetedRelationFragment = array_pop($relationFragments);
+                $matchedRelation          = [];
+                preg_match(
+                    '/^([a-zA-Z\.\-\_]+)\((.+)\)$/', $targetedRelationFragment,
+                    $matchedRelation
+                );
 
-            if (!empty($matchedRelation)) {
-                array_push($relationFragments, $matchedRelation[1]);
-                $relationName   = implode('.', $relationFragments);
-                $relationFields = explode('|', $matchedRelation[2]);
-            }else {
-                $relationName   = $relation;
-                $relationFields = [];
-            }
+                if (!empty($matchedRelation)) {
+                    array_push($relationFragments, $matchedRelation[1]);
+                    $relationName   = implode('.', $relationFragments);
+                    $relationFields = explode('|', $matchedRelation[2]);
+                } else {
+                    $relationName   = $relation;
+                    $relationFields = [];
+                }
 
-            return [
-                'relationName'   => $relationName,
-                'relationFields' => $relationFields
-            ];
+                return [
+                    'relationName'   => $relationName,
+                    'relationFields' => $relationFields
+                ];
 
-        }, $parsedRelations);
+            }, $parsedRelations
+        );
 
         return $result;
     }
@@ -177,23 +210,6 @@ class Request extends \Illuminate\Http\Request
         }
 
         return null;
-    }
-
-    /**
-     * Matches every filter string and converts it into fragments
-     *
-     * @param $filter
-     *
-     * @return array
-     */
-    protected function matchFilter($filter)
-    {
-        $filterFragments = [];
-        preg_match('/^([a-zA-Z0-9\-\_\.]+)(' . implode('|',
-                $this->comparisonSymbols) . '{1})(([a-zA-Z0-9\-\_\,]+)|\(([a-zA-Z0-9\-\_\,\|]+)\))$/', $filter,
-            $filterFragments);
-
-        return $filterFragments;
     }
 
 }

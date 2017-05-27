@@ -2,16 +2,17 @@
 
 namespace ALS\Modules\User\Controllers;
 
+use ALS\Core\Http\Request;
 use ALS\Http\Controllers\Controller;
 use ALS\Modules\Option\Repositories\OptionRepository;
 use ALS\Modules\User\Repositories\UserRepository;
 use ALS\Repositories\TransientRepository;
 use Carbon\Carbon;
 use Firebase\JWT\JWT;
-use ALS\Core\Http\Request;
 
 /**
  * Class AuthController
+ *
  * @package ALS\Modules\User\Controllers
  */
 class AuthController extends Controller
@@ -27,8 +28,9 @@ class AuthController extends Controller
      */
     protected $transientRepo;
 
-    public function __construct(UserRepository $userRepo, TransientRepository $transientRepo)
-    {
+    public function __construct(UserRepository $userRepo,
+        TransientRepository $transientRepo
+    ) {
         $this->userRepo      = $userRepo;
         $this->transientRepo = $transientRepo;
     }
@@ -45,14 +47,18 @@ class AuthController extends Controller
     public function login(Request $request, OptionRepository $optionRepo)
     {
         // Validate request
-        $this->validate($request, [
+        $this->validate(
+            $request, [
             'username' => 'required',
             'password' => 'required'
-        ]);
+        ]
+        );
 
         // Get user
-        $userInstance = $this->userRepo->findByField('username', $request->input('username'),
-            ['id', 'name', 'last_name', 'password'])->first();
+        $userInstance = $this->userRepo->findByField(
+            'username', $request->input('username'),
+            ['id', 'name', 'last_name', 'password']
+        )->first();
 
         // Check if user exists
         if (is_null($userInstance)) {
@@ -60,14 +66,21 @@ class AuthController extends Controller
         }
 
         // Verify if password matches
-        if (!password_verify($request->input('password'), $userInstance->password)) {
+        if (!password_verify(
+            $request->input('password'), $userInstance->password
+        )
+        ) {
             return $this->jsonResponse(null, 'Invalid login credentials', 400);
         }
 
         // Getting Auth Options from DB
         $jwtKey                = $optionRepo->get('auth', 'jwt_key')->value;
-        $tokenExpirationPeriod = $optionRepo->get('auth', 'token_expire_time')->value;
-        $jwtEncryptionAlg      = $optionRepo->get('auth', 'jwt_encryption_algo')->value;
+        $tokenExpirationPeriod = $optionRepo->get(
+            'auth', 'token_expire_time'
+        )->value;
+        $jwtEncryptionAlg      = $optionRepo->get(
+            'auth', 'jwt_encryption_algo'
+        )->value;
 
 
         // Generate JWT token
@@ -89,14 +102,21 @@ class AuthController extends Controller
         ];
 
         // Saving token into transient table
-        try{
-            $this->transientRepo->create([
-                'key'        => $userInstance->id,
-                'value'      => $jwt,
-                'expired_at' => Carbon::now()->addSeconds($tokenExpirationPeriod)
-            ]);
-        }catch (\Exception $e){
-            return $this->jsonResponse(null, 'Unable to log you in, please try again', 400, $e->getMessage());
+        try {
+            $this->transientRepo->create(
+                [
+                    'key'        => $userInstance->id,
+                    'value'      => $jwt,
+                    'expired_at' => Carbon::now()->addSeconds(
+                        $tokenExpirationPeriod
+                    )
+                ]
+            );
+        } catch (\Exception $e) {
+            return $this->jsonResponse(
+                null, 'Unable to log you in, please try again', 400,
+                $e->getMessage()
+            );
         }
 
         return $this->jsonResponse($output, 'Logged in successfully');
@@ -118,13 +138,17 @@ class AuthController extends Controller
 
         if ($logOutAll) {
             // Remove all user tokens/sessions
-            $this->transientRepo->deleteWhere(['key' => $currentLoggedInUser->id]);
-        }else {
+            $this->transientRepo->deleteWhere(
+                ['key' => $currentLoggedInUser->id]
+            );
+        } else {
             // Remove only current token/session
-            $this->transientRepo->deleteWhere([
-                'key'   => $currentLoggedInUser->id,
-                'value' => $request->header('Authorization')
-            ]);
+            $this->transientRepo->deleteWhere(
+                [
+                    'key'   => $currentLoggedInUser->id,
+                    'value' => $request->header('Authorization')
+                ]
+            );
         }
 
         return $this->jsonResponse(null, 'Logged out successfully');

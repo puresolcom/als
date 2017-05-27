@@ -16,12 +16,13 @@ class Handler extends ExceptionHandler
      *
      * @var array
      */
-    protected $dontReport = [
-        AuthorizationException::class,
-        HttpException::class,
-        ModelNotFoundException::class,
-        ValidationException::class,
-    ];
+    protected $dontReport
+        = [
+            AuthorizationException::class,
+            HttpException::class,
+            ModelNotFoundException::class,
+            ValidationException::class,
+        ];
 
     /**
      * Report or log an exception.
@@ -41,7 +42,7 @@ class Handler extends ExceptionHandler
      * Render an exception into an HTTP response.
      *
      * @param  \ALS\Core\Http\Request $request
-     * @param  \Exception               $e
+     * @param  \Exception             $e
      *
      * @return \Illuminate\Http\Response
      */

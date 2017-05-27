@@ -10,7 +10,8 @@ use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Laravel\Lumen\Auth\Authorizable;
 
-class User extends Model implements AuthenticatableContract, AuthorizableContract
+class User extends Model
+    implements AuthenticatableContract, AuthorizableContract
 {
     use UserTrait, Authenticatable, Authorizable;
 
@@ -21,18 +22,20 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      *
      * @var array
      */
-    protected $guarded = [
+    protected $guarded
+        = [
 
-    ];
+        ];
 
     /**
      * The attributes excluded from the model's JSON form.
      *
      * @var array
      */
-    protected $hidden = [
-        'password'
-    ];
+    protected $hidden
+        = [
+            'password'
+        ];
 
     public function shipments()
     {
@@ -41,7 +44,9 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
 
     public function groups()
     {
-        return $this->belongsToMany(Group::class, 'aw_user_group', 'user_id', 'group_id');
+        return $this->belongsToMany(
+            Group::class, 'aw_user_group', 'user_id', 'group_id'
+        );
     }
 
     public function getFullName()

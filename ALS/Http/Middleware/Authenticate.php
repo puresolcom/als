@@ -32,15 +32,17 @@ class Authenticate
      * Handle an incoming request.
      *
      * @param  \ALS\Core\Http\Request $request
-     * @param  \Closure                 $next
-     * @param  string|null              $guard
+     * @param  \Closure               $next
+     * @param  string|null            $guard
      *
      * @return mixed
      */
     public function handle($request, Closure $next, $guard = null)
     {
         if ($this->auth->guard($guard)->guest()) {
-            return $this->jsonResponse(null, 'Session Invalid/Expired. Please login again', 401);
+            return $this->jsonResponse(
+                null, 'Session Invalid/Expired. Please login again', 401
+            );
         }
 
         return $next($request);

@@ -8,9 +8,9 @@ use ALS\Modules\User\Models\User;
 
 class Shipment extends Model
 {
+    public    $timestamps = true;
     protected $table      = 'aw_shipment';
     protected $guarded    = [];
-    public    $timestamps = true;
 
     public function driver()
     {

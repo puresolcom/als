@@ -8,16 +8,6 @@ trait UserTrait
 {
 
     /**
-     * Get current user roles
-     *
-     * @return mixed
-     */
-    public function getRoles()
-    {
-        return $this->{config('auth.authorization.user_role_relation_name')};
-    }
-
-    /**
      * Check if the user has role
      *
      * @param      $name
@@ -33,13 +23,13 @@ trait UserTrait
 
                 if ($hasRole && !$requireAll) {
                     return true;
-                }elseif (!$hasRole && $requireAll) {
+                } elseif (!$hasRole && $requireAll) {
                     return false;
                 }
             }
 
             return $requireAll;
-        }else {
+        } else {
             foreach ($this->getRoles() as $role) {
                 if ($role->name == $name) {
                     return true;
@@ -48,6 +38,16 @@ trait UserTrait
         }
 
         return false;
+    }
+
+    /**
+     * Get current user roles
+     *
+     * @return mixed
+     */
+    public function getRoles()
+    {
+        return $this->{config('auth.authorization.user_role_relation_name')};
     }
 
     /**

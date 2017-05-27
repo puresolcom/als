@@ -9,6 +9,7 @@ use ALS\Modules\User\Repositories\UserRepository;
 
 /**
  * Class UserController
+ *
  * @package ALS\Modules\User\Controllers
  */
 class UserController extends Controller

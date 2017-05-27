@@ -8,8 +8,10 @@ class AuthorizationServiceProvider extends ServiceProvider
 {
     public function register()
     {
-        $this->app->bind('authorization', function ($app){
+        $this->app->bind(
+            'authorization', function ($app) {
             return new Authorization($app);
-        });
+        }
+        );
     }
 }

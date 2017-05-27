@@ -7,6 +7,7 @@ use Laravel\Lumen\Application;
 
 /**
  * Class Authorization
+ *
  * @package ALS\Core\Authorization
  */
 class Authorization
@@ -14,6 +15,7 @@ class Authorization
 
     /**
      * App Instance
+     *
      * @var Application
      */
     public $app;
@@ -21,16 +23,6 @@ class Authorization
     public function __construct($app)
     {
         $this->app = $app;
-    }
-
-    /**
-     * Get user instance
-     *
-     * @return mixed
-     */
-    public function user()
-    {
-        return $this->app->auth->user();
     }
 
     /**
@@ -47,6 +39,16 @@ class Authorization
             return $user->hasRole($name, $requireAll);
         }
         return false;
+    }
+
+    /**
+     * Get user instance
+     *
+     * @return mixed
+     */
+    public function user()
+    {
+        return $this->app->auth->user();
     }
 
     public function owns(Model $object, $referenceKey = 'user_id')

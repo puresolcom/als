@@ -4,7 +4,8 @@ namespace ALS\Core\Repository;
 
 use ALS\Core\Eloquent\Builder;
 
-abstract class BaseRepository extends \Prettus\Repository\Eloquent\BaseRepository
+abstract class BaseRepository
+    extends \Prettus\Repository\Eloquent\BaseRepository
 {
 
     /**
@@ -12,9 +13,10 @@ abstract class BaseRepository extends \Prettus\Repository\Eloquent\BaseRepositor
      *
      * @var array
      */
-    protected $symbolMap = [
-        ':' => '='
-    ];
+    protected $symbolMap
+        = [
+            ':' => '='
+        ];
 
     /**
      * Retrieve all data of repository, paginated
@@ -26,12 +28,16 @@ abstract class BaseRepository extends \Prettus\Repository\Eloquent\BaseRepositor
      *
      * @return mixed
      */
-    public function paginate($limit = null, $columns = ['*'], $method = "paginate", $dataKey = 'data')
-    {
+    public function paginate($limit = null, $columns = ['*'],
+        $method = "paginate", $dataKey = 'data'
+    ) {
         $this->applyCriteria();
         $this->applyScope();
-        $limit   = is_null($limit) ? config('repository.pagination.limit', 20) : $limit;
-        $results = $this->model->{$method}($limit, $columns, $pageName = 'page', $page = null, $dataKey);
+        $limit   = is_null($limit) ? config('repository.pagination.limit', 20)
+            : $limit;
+        $results = $this->model->{$method}(
+            $limit, $columns, $pageName = 'page', $page = null, $dataKey
+        );
         $results->appends(app('request')->query());
         $this->resetModel();
 
@@ -57,7 +63,7 @@ abstract class BaseRepository extends \Prettus\Repository\Eloquent\BaseRepositor
         $relations = null,
         $limit = null,
         $dataKey = 'data'
-    ){
+    ) {
         $model  = $this->model;
         $select = $this->prepareColumns($fields, $model);
         $with   = $this->prepareRelations($relations, $select);
@@ -67,63 +73,6 @@ abstract class BaseRepository extends \Prettus\Repository\Eloquent\BaseRepositor
         return $this->paginateResult($limit, $dataKey, $sort);
 
 
-    }
-
-    /**
-     * Convert url comparison symbols to mysql symbols and maps relational filtering
-     *
-     * @param Builder $model
-     * @param         $filter
-     *
-     * @return bool|\Illuminate\Database\Eloquent\Builder
-     */
-    protected function interpretFilterSymbols(Builder &$model, $filter)
-    {
-        if (!isset($filter['compare'])) {
-            return false;
-        }
-
-        if (array_key_exists($filter['compare'], $this->symbolMap)) {
-            // Convert symbols
-            $filter['compare'] = $this->symbolMap[$filter['compare']];
-        }
-
-        if ($filter['relational']) {
-            return $model->whereHas($filter['relationName'], function ($query) use ($filter){
-                return $this->appendClauses($query, $filter);
-            }
-            );
-        }else {
-            return $this->appendClauses($model, $filter);
-        }
-    }
-
-    /**
-     * Applies clauses to the current query context/scope
-     *
-     * @param $model
-     * @param $filter
-     *
-     * @return mixed
-     */
-    protected function appendClauses(&$model, $filter)
-    {
-        // Case null check
-        if (is_string($filter['value']) && strtolower($filter['value']) == 'NULL') {
-            if ($filter['compare'] == '=') {
-                return $model->whereNull($filter['field']);
-            }else {
-                return $model->whereNotNull($filter['field']);
-            }
-        }else {
-            // Case of multiple values
-            if (is_array($filter['value'])) {
-                return $model->whereIn($filter['field'], $filter['value']);
-            }// Any other case
-            else {
-                return $model->where($filter['field'], $filter['compare'], $filter['value']);
-            }
-        }
     }
 
     /**
@@ -154,16 +103,22 @@ abstract class BaseRepository extends \Prettus\Repository\Eloquent\BaseRepositor
         // Preparing relations
         if (is_array($relations)) {
             foreach ($relations as $relation) {
-                $results = $results->with([
-                    $relation['relationName'] => function ($query) use ($relation){
-                        if (count($relation['relationFields']) > 0) {
-                            $fields = array_merge(['id'], $relation['relationFields']);
-                        }else {
-                            $fields = ['*'];
+                $results = $results->with(
+                    [
+                        $relation['relationName'] => function ($query) use (
+                            $relation
+                        ) {
+                            if (count($relation['relationFields']) > 0) {
+                                $fields = array_merge(
+                                    ['id'], $relation['relationFields']
+                                );
+                            } else {
+                                $fields = ['*'];
+                            }
+                            return $query->select($fields);
                         }
-                        return $query->select($fields);
-                    }
-                ]);
+                    ]
+                );
             }
             return $results;
         }
@@ -215,7 +170,75 @@ abstract class BaseRepository extends \Prettus\Repository\Eloquent\BaseRepositor
     protected function paginateResult($limit, $dataKey, $results)
     {
         // Paginate
-        $limit = is_null($limit) ? config('repository.pagination.limit', 20) : $limit;
-        return $this->parserResult($results->paginate($limit, ['*'], $pageName = 'page', $page = null, $dataKey));
+        $limit = is_null($limit) ? config('repository.pagination.limit', 20)
+            : $limit;
+        return $this->parserResult(
+            $results->paginate(
+                $limit, ['*'], $pageName = 'page', $page = null, $dataKey
+            )
+        );
+    }
+
+    /**
+     * Convert url comparison symbols to mysql symbols and maps relational
+     * filtering
+     *
+     * @param Builder $model
+     * @param         $filter
+     *
+     * @return bool|\Illuminate\Database\Eloquent\Builder
+     */
+    protected function interpretFilterSymbols(Builder &$model, $filter)
+    {
+        if (!isset($filter['compare'])) {
+            return false;
+        }
+
+        if (array_key_exists($filter['compare'], $this->symbolMap)) {
+            // Convert symbols
+            $filter['compare'] = $this->symbolMap[$filter['compare']];
+        }
+
+        if ($filter['relational']) {
+            return $model->whereHas(
+                $filter['relationName'], function ($query) use ($filter) {
+                return $this->appendClauses($query, $filter);
+            }
+            );
+        } else {
+            return $this->appendClauses($model, $filter);
+        }
+    }
+
+    /**
+     * Applies clauses to the current query context/scope
+     *
+     * @param $model
+     * @param $filter
+     *
+     * @return mixed
+     */
+    protected function appendClauses(&$model, $filter)
+    {
+        // Case null check
+        if (is_string($filter['value'])
+            && strtolower($filter['value']) == 'NULL'
+        ) {
+            if ($filter['compare'] == '=') {
+                return $model->whereNull($filter['field']);
+            } else {
+                return $model->whereNotNull($filter['field']);
+            }
+        } else {
+            // Case of multiple values
+            if (is_array($filter['value'])) {
+                return $model->whereIn($filter['field'], $filter['value']);
+            }// Any other case
+            else {
+                return $model->where(
+                    $filter['field'], $filter['compare'], $filter['value']
+                );
+            }
+        }
     }
 }

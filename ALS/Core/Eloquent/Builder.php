@@ -19,8 +19,9 @@ class Builder extends \Illuminate\Database\Eloquent\Builder
      *
      * @throws \InvalidArgumentException
      */
-    public function paginate($perPage = null, $columns = ['*'], $pageName = 'page', $page = null, $dataKey = 'data')
-    {
+    public function paginate($perPage = null, $columns = ['*'],
+        $pageName = 'page', $page = null, $dataKey = 'data'
+    ) {
         $page = $page ? : Paginator::resolveCurrentPage($pageName);
 
         $perPage = $perPage ? : $this->model->getPerPage();
@@ -29,10 +30,12 @@ class Builder extends \Illuminate\Database\Eloquent\Builder
             ? $this->forPage($page, $perPage)->get($columns)
             : $this->model->newCollection();
 
-        return new LengthAwarePaginator($results, $total, $perPage, $page, [
+        return new LengthAwarePaginator(
+            $results, $total, $perPage, $page, [
             'path'     => Paginator::resolveCurrentPath(),
             'pageName' => $pageName,
             'data_key' => $dataKey
-        ]);
+        ]
+        );
     }
 }

@@ -4,8 +4,9 @@ namespace ALS\Core\Pagination;
 
 class LengthAwarePaginator extends \Illuminate\Pagination\LengthAwarePaginator
 {
-    public function __construct($items, $total, $perPage, $currentPage, array $options)
-    {
+    public function __construct($items, $total, $perPage, $currentPage,
+        array $options
+    ) {
         parent::__construct($items, $total, $perPage, $currentPage, $options);
     }
 
