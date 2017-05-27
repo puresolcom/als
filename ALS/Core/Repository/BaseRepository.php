@@ -4,19 +4,16 @@ namespace ALS\Core\Repository;
 
 use ALS\Core\Eloquent\Builder;
 
-abstract class BaseRepository
-    extends \Prettus\Repository\Eloquent\BaseRepository
+abstract class BaseRepository extends \Prettus\Repository\Eloquent\BaseRepository
 {
-
     /**
      * Maps API symbols to SQL-like symbols
      *
      * @var array
      */
-    protected $symbolMap
-        = [
-            ':' => '='
-        ];
+    protected $symbolMap = [
+        ':' => '=',
+    ];
 
     /**
      * Retrieve all data of repository, paginated
@@ -28,16 +25,16 @@ abstract class BaseRepository
      *
      * @return mixed
      */
-    public function paginate($limit = null, $columns = ['*'],
-        $method = "paginate", $dataKey = 'data'
+    public function paginate(
+        $limit = null,
+        $columns = ['*'],
+        $method = "paginate",
+        $dataKey = 'data'
     ) {
         $this->applyCriteria();
         $this->applyScope();
-        $limit   = is_null($limit) ? config('repository.pagination.limit', 20)
-            : $limit;
-        $results = $this->model->{$method}(
-            $limit, $columns, $pageName = 'page', $page = null, $dataKey
-        );
+        $limit   = is_null($limit) ? config('repository.pagination.limit', 20) : $limit;
+        $results = $this->model->{$method}($limit, $columns, $pageName = 'page', $page = null, $dataKey);
         $results->appends(app('request')->query());
         $this->resetModel();
 
@@ -70,9 +67,8 @@ abstract class BaseRepository
         $filter = $this->prepareFilters($filters, $with);
         $sort   = $this->prepareSorting($sort, $filter);
         $this->resetModel();
+
         return $this->paginateResult($limit, $dataKey, $sort);
-
-
     }
 
     /**
@@ -84,11 +80,13 @@ abstract class BaseRepository
     protected function prepareColumns($fields, $results)
     {
         // Preparing select columns
-        $fields = !empty($fields) ? $fields : ['*'];
+        $fields = ! empty($fields) ? $fields : ['*'];
         if (is_array($fields)) {
             $results = $results->select($fields);
+
             return $results;
         }
+
         return $results;
     }
 
@@ -103,25 +101,24 @@ abstract class BaseRepository
         // Preparing relations
         if (is_array($relations)) {
             foreach ($relations as $relation) {
-                $results = $results->with(
-                    [
-                        $relation['relationName'] => function ($query) use (
-                            $relation
-                        ) {
-                            if (count($relation['relationFields']) > 0) {
-                                $fields = array_merge(
-                                    ['id'], $relation['relationFields']
-                                );
-                            } else {
-                                $fields = ['*'];
-                            }
-                            return $query->select($fields);
+                $results = $results->with([
+                    $relation['relationName'] => function ($query) use (
+                        $relation
+                    ) {
+                        if (count($relation['relationFields']) > 0) {
+                            $fields = array_merge(['id'], $relation['relationFields']);
+                        } else {
+                            $fields = ['*'];
                         }
-                    ]
-                );
+
+                        return $query->select($fields);
+                    },
+                ]);
             }
+
             return $results;
         }
+
         return $results;
     }
 
@@ -138,45 +135,11 @@ abstract class BaseRepository
             foreach ($filters as $filter) {
                 $results = $this->interpretFilterSymbols($results, $filter);
             }
+
             return $results;
         }
-        return $results;
-    }
 
-    /**
-     * @param $sort
-     * @param $results
-     *
-     * @return mixed;
-     */
-    protected function prepareSorting($sort, $results)
-    {
-        // Preparing Sorting
-        if (is_array($sort)) {
-            foreach ($sort as $order) {
-                $results->orderBy($order['orderBy'], $order['direction']);
-            }
-        }
         return $results;
-    }
-
-    /**
-     * @param $limit
-     * @param $dataKey
-     * @param $results
-     *
-     * @return mixed
-     */
-    protected function paginateResult($limit, $dataKey, $results)
-    {
-        // Paginate
-        $limit = is_null($limit) ? config('repository.pagination.limit', 20)
-            : $limit;
-        return $this->parserResult(
-            $results->paginate(
-                $limit, ['*'], $pageName = 'page', $page = null, $dataKey
-            )
-        );
     }
 
     /**
@@ -190,7 +153,7 @@ abstract class BaseRepository
      */
     protected function interpretFilterSymbols(Builder &$model, $filter)
     {
-        if (!isset($filter['compare'])) {
+        if (! isset($filter['compare'])) {
             return false;
         }
 
@@ -200,11 +163,9 @@ abstract class BaseRepository
         }
 
         if ($filter['relational']) {
-            return $model->whereHas(
-                $filter['relationName'], function ($query) use ($filter) {
+            return $model->whereHas($filter['relationName'], function ($query) use ($filter) {
                 return $this->appendClauses($query, $filter);
-            }
-            );
+            });
         } else {
             return $this->appendClauses($model, $filter);
         }
@@ -221,9 +182,7 @@ abstract class BaseRepository
     protected function appendClauses(&$model, $filter)
     {
         // Case null check
-        if (is_string($filter['value'])
-            && strtolower($filter['value']) == 'NULL'
-        ) {
+        if (is_string($filter['value']) && strtolower($filter['value']) == 'NULL') {
             if ($filter['compare'] == '=') {
                 return $model->whereNull($filter['field']);
             } else {
@@ -235,10 +194,41 @@ abstract class BaseRepository
                 return $model->whereIn($filter['field'], $filter['value']);
             }// Any other case
             else {
-                return $model->where(
-                    $filter['field'], $filter['compare'], $filter['value']
-                );
+                return $model->where($filter['field'], $filter['compare'], $filter['value']);
             }
         }
+    }
+
+    /**
+     * @param $sort
+     * @param $results
+     *
+     * @return mixed;
+     */
+    protected function prepareSorting($sort, $results)
+    {
+        // Preparing Sorting
+        if (is_array($sort)) {
+            foreach ($sort as $order) {
+                $results->orderBy($order['orderBy'], $order['direction']);
+            }
+        }
+
+        return $results;
+    }
+
+    /**
+     * @param $limit
+     * @param $dataKey
+     * @param $results
+     *
+     * @return mixed
+     */
+    protected function paginateResult($limit, $dataKey, $results)
+    {
+        // Paginate
+        $limit = is_null($limit) ? config('repository.pagination.limit', 20) : $limit;
+
+        return $this->parserResult($results->paginate($limit, ['*'], $pageName = 'page', $page = null, $dataKey));
     }
 }

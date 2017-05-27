@@ -12,7 +12,6 @@ use Laravel\Lumen\Application;
  */
 class Authorization
 {
-
     /**
      * App Instance
      *
@@ -38,6 +37,7 @@ class Authorization
         if ($user = $this->user()) {
             return $user->hasRole($name, $requireAll);
         }
+
         return false;
     }
 
@@ -56,6 +56,7 @@ class Authorization
         if ($user = $this->user()) {
             return $user->owns($object, $referenceKey);
         }
+
         return false;
     }
 }

@@ -4,7 +4,6 @@ namespace ALS\Modules\Option\Controllers;
 
 use ALS\Http\Controllers\Controller;
 
-
 /**
  * Class OptionController
  *
@@ -12,5 +11,4 @@ use ALS\Http\Controllers\Controller;
  */
 class OptionController extends Controller
 {
-
 }

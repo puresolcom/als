@@ -3,10 +3,9 @@ namespace ALS\Modules\Shipment\Providers;
 
 class ModuleServiceProvider extends \ALS\Providers\ModuleServiceProvider
 {
-    static $routesPaths
-        = [
-            __DIR__ . '/../routes/routes.php'
-        ];
+    static $routesPaths = [
+        __DIR__.'/../routes/routes.php',
+    ];
 
     public function getModuleName(): string
     {
@@ -15,6 +14,5 @@ class ModuleServiceProvider extends \ALS\Providers\ModuleServiceProvider
 
     public function boot()
     {
-
     }
 }

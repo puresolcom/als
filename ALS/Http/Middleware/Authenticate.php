@@ -9,6 +9,7 @@ use Illuminate\Contracts\Auth\Factory as Auth;
 class Authenticate
 {
     use RestfulResponseTrait;
+
     /**
      * The authentication guard factory instance.
      *
@@ -40,9 +41,7 @@ class Authenticate
     public function handle($request, Closure $next, $guard = null)
     {
         if ($this->auth->guard($guard)->guest()) {
-            return $this->jsonResponse(
-                null, 'Session Invalid/Expired. Please login again', 401
-            );
+            return $this->jsonResponse(null, 'Session Invalid/Expired. Please login again', 401);
         }
 
         return $next($request);

@@ -6,7 +6,6 @@ use ALS\Core\Http\Request;
 use ALS\Http\Controllers\Controller;
 use ALS\Modules\Shipment\Repositories\ShipmentRepository;
 
-
 /**
  * Class ShipmentController
  *
@@ -32,11 +31,7 @@ class  ShipmentController extends Controller
     public function list(Request $request)
     {
         try {
-            $restQuery = $this->shipmentRepo->restQueryBuilder(
-                $request->getFields(), $request->getFilters(),
-                $request->getSort(), $request->getRelations(),
-                $request->getPerPage(), 'shipments'
-            );
+            $restQuery = $this->shipmentRepo->restQueryBuilder($request->getFields(), $request->getFilters(), $request->getSort(), $request->getRelations(), $request->getPerPage(), 'shipments');
         } catch (\Exception $e) {
             return $this->jsonResponse($e->getMessage(), 'Request Failed', 400);
         }

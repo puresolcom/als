@@ -4,7 +4,11 @@ namespace ALS\Core\Pagination;
 
 class LengthAwarePaginator extends \Illuminate\Pagination\LengthAwarePaginator
 {
-    public function __construct($items, $total, $perPage, $currentPage,
+    public function __construct(
+        $items,
+        $total,
+        $perPage,
+        $currentPage,
         array $options
     ) {
         parent::__construct($items, $total, $perPage, $currentPage, $options);
@@ -23,7 +27,7 @@ class LengthAwarePaginator extends \Illuminate\Pagination\LengthAwarePaginator
                 'from'          => $this->firstItem(),
                 'to'            => $this->lastItem(),
             ],
-            $this->data_key => $this->items->toArray()
+            $this->data_key => $this->items->toArray(),
         ];
     }
 }

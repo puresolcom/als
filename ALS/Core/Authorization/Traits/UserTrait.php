@@ -6,7 +6,6 @@ use ALS\Core\Eloquent\Model;
 
 trait UserTrait
 {
-
     /**
      * Check if the user has role
      *
@@ -21,9 +20,9 @@ trait UserTrait
             foreach ($name as $roleName) {
                 $hasRole = $this->hasRole($roleName);
 
-                if ($hasRole && !$requireAll) {
+                if ($hasRole && ! $requireAll) {
                     return true;
-                } elseif (!$hasRole && $requireAll) {
+                } elseif (! $hasRole && $requireAll) {
                     return false;
                 }
             }

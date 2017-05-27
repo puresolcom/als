@@ -6,7 +6,9 @@ use ALS\Core\Eloquent\Model;
 
 class Location extends Model
 {
-    public    $timestamps = false;
-    protected $table      = 'aw_location';
-    protected $guarded    = [];
+    public $timestamps = false;
+
+    protected $table = 'aw_location';
+
+    protected $guarded = [];
 }

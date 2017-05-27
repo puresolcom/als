@@ -4,7 +4,6 @@ namespace ALS\Core\Http;
 
 class Request extends \Illuminate\Http\Request
 {
-
     protected $comparisonSymbols = [':', '=', '<=', '>=', '!='];
 
     /**
@@ -14,13 +13,12 @@ class Request extends \Illuminate\Http\Request
      */
     public function getFields()
     {
-        if (!$this->has('fields')) {
+        if (! $this->has('fields')) {
             return null;
         }
         $fields = $this->get('fields');
 
-        return is_array($parsedFields = array_filter(explode(',', $fields)))
-            ? $parsedFields : null;
+        return is_array($parsedFields = array_filter(explode(',', $fields))) ? $parsedFields : null;
     }
 
     /**
@@ -30,7 +28,7 @@ class Request extends \Illuminate\Http\Request
      */
     public function getFilters()
     {
-        if (!$this->has('q')) {
+        if (! $this->has('q')) {
             return null;
         }
 
@@ -51,7 +49,7 @@ class Request extends \Illuminate\Http\Request
         $result = [];
 
         foreach ($filters as $filter) {
-            if (!str_contains($filter, $this->comparisonSymbols)) {
+            if (! str_contains($filter, $this->comparisonSymbols)) {
                 return null;
             }
 
@@ -61,11 +59,7 @@ class Request extends \Illuminate\Http\Request
             list($field, $compare, $value) = array_slice($filterFragments, 1);
 
             // One or multiple values
-            $value = (isset($filterFragments[5])
-                && $multiValues = explode(
-                    '|',
-                    $filterFragments[5]
-                )) ? $multiValues : $value;
+            $value = (isset($filterFragments[5]) && $multiValues = explode('|', $filterFragments[5])) ? $multiValues : $value;
 
             if (strpos($field, '.') !== false) {
                 $relational        = true;
@@ -79,7 +73,7 @@ class Request extends \Illuminate\Http\Request
                 'relationName' => $relationName,
                 'field'        => $field,
                 'compare'      => $compare,
-                'value'        => $value
+                'value'        => $value,
             ];
         }
 
@@ -96,14 +90,7 @@ class Request extends \Illuminate\Http\Request
     protected function matchFilter($filter)
     {
         $filterFragments = [];
-        preg_match(
-            '/^([a-zA-Z0-9\-\_\.]+)(' . implode(
-                '|',
-                $this->comparisonSymbols
-            ) . '{1})(([a-zA-Z0-9\-\_\,]+)|\(([a-zA-Z0-9\-\_\,\|]+)\))$/',
-            $filter,
-            $filterFragments
-        );
+        preg_match('/^([a-zA-Z0-9\-\_\.]+)('.implode('|', $this->comparisonSymbols).'{1})(([a-zA-Z0-9\-\_\,]+)|\(([a-zA-Z0-9\-\_\,\|]+)\))$/', $filter, $filterFragments);
 
         return $filterFragments;
     }
@@ -115,32 +102,30 @@ class Request extends \Illuminate\Http\Request
      */
     public function getSort()
     {
-        if (!$this->has('sort')) {
+        if (! $this->has('sort')) {
             return null;
         }
         $sort       = $this->get('sort');
         $parsedSort = array_filter(explode(',', $sort));
 
-        $result = array_map(
-            function ($sort) {
+        $result = array_map(function ($sort) {
 
-                $orderBy = null;
-                if (strpos($sort, '!', 0) === 0) {
-                    $orderBy   = substr($sort, 1);
-                    $direction = 'DESC';
-                } elseif (strpos($sort, ':') !== false) {
-                    list($orderBy, $direction) = explode(':', $sort);
-                } else {
-                    $orderBy   = $sort;
-                    $direction = 'ASC';
-                }
+            $orderBy = null;
+            if (strpos($sort, '!', 0) === 0) {
+                $orderBy   = substr($sort, 1);
+                $direction = 'DESC';
+            } elseif (strpos($sort, ':') !== false) {
+                list($orderBy, $direction) = explode(':', $sort);
+            } else {
+                $orderBy   = $sort;
+                $direction = 'ASC';
+            }
 
-                return [
-                    'orderBy'   => $orderBy,
-                    'direction' => $direction
-                ];
-            }, $parsedSort
-        );
+            return [
+                'orderBy'   => $orderBy,
+                'direction' => $direction,
+            ];
+        }, $parsedSort);
 
         return $result;
     }
@@ -152,44 +137,38 @@ class Request extends \Illuminate\Http\Request
      */
     public function getRelations()
     {
-        if (!$this->has('with')) {
+        if (! $this->has('with')) {
             return null;
         }
 
         $relations       = $this->get('with');
         $parsedRelations = array_filter(explode(',', $relations));
 
-        $result = array_map(
-            function ($relation) {
+        $result = array_map(function ($relation) {
 
-                if (strpos($relation, '.') !== false) {
-                    $relationFragments = explode('.', $relation);
-                } else {
-                    $relationFragments[] = $relation;
-                }
-                $targetedRelationFragment = array_pop($relationFragments);
-                $matchedRelation          = [];
-                preg_match(
-                    '/^([a-zA-Z\.\-\_]+)\((.+)\)$/', $targetedRelationFragment,
-                    $matchedRelation
-                );
+            if (strpos($relation, '.') !== false) {
+                $relationFragments = explode('.', $relation);
+            } else {
+                $relationFragments[] = $relation;
+            }
+            $targetedRelationFragment = array_pop($relationFragments);
+            $matchedRelation          = [];
+            preg_match('/^([a-zA-Z\.\-\_]+)\((.+)\)$/', $targetedRelationFragment, $matchedRelation);
 
-                if (!empty($matchedRelation)) {
-                    array_push($relationFragments, $matchedRelation[1]);
-                    $relationName   = implode('.', $relationFragments);
-                    $relationFields = explode('|', $matchedRelation[2]);
-                } else {
-                    $relationName   = $relation;
-                    $relationFields = [];
-                }
+            if (! empty($matchedRelation)) {
+                array_push($relationFragments, $matchedRelation[1]);
+                $relationName   = implode('.', $relationFragments);
+                $relationFields = explode('|', $matchedRelation[2]);
+            } else {
+                $relationName   = $relation;
+                $relationFields = [];
+            }
 
-                return [
-                    'relationName'   => $relationName,
-                    'relationFields' => $relationFields
-                ];
-
-            }, $parsedRelations
-        );
+            return [
+                'relationName'   => $relationName,
+                'relationFields' => $relationFields,
+            ];
+        }, $parsedRelations);
 
         return $result;
     }
@@ -211,5 +190,4 @@ class Request extends \Illuminate\Http\Request
 
         return null;
     }
-
 }

@@ -6,7 +6,6 @@ use ALS\Core\Http\Request;
 use ALS\Http\Controllers\Controller;
 use ALS\Modules\User\Repositories\UserRepository;
 
-
 /**
  * Class UserController
  *
@@ -26,12 +25,9 @@ class UserController extends Controller
 
     public function list(Request $request)
     {
-
     }
 
     public function get()
     {
-
     }
-
 }

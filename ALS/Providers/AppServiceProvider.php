@@ -14,11 +14,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton(
-            Request::class, function () {
+        $this->app->singleton(Request::class, function () {
             return Request::capture();
-        }
-        );
+        });
 
         $this->app->alias(Request::class, 'request');
     }
