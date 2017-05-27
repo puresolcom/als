@@ -33,7 +33,7 @@ class Request extends \Illuminate\Http\Request
             return null;
         }
 
-        $filters = $this->get('q');
+        $filters = array_filter(explode(',', $this->get('q')));
 
         return $this->hydrateFilters($filters);
     }
@@ -47,54 +47,39 @@ class Request extends \Illuminate\Http\Request
      */
     protected function hydrateFilters($filters)
     {
-        $filters = array_filter(explode(',', $filters));
-
-        if (!is_array($filters)) {
-            return null;
-        }
-
         $result = [];
+
         foreach ($filters as $filter) {
-            if (str_contains($filter, $this->comparisonSymbols)) {
-                $filterFragments = [];
-                preg_match('/^([a-zA-Z0-9\-\_\.]+)(' . implode('|',
-                        $this->comparisonSymbols) . '{1})(([a-zA-Z0-9\-\_\,]+)|\(([a-zA-Z0-9\-\_\,\|]+)\))$/', $filter,
-                    $filterFragments);
-
-                $relational   = false;
-                $relationName = null;
-                $field        = $filterFragments[1];
-                $compare      = $filterFragments[2];
-                $value        = $filterFragments[3];
-
-                // if multiple values provided
-                if (isset($filterFragments[5])) {
-                    $multiValues = explode('|', $filterFragments[5]);
-
-                    if (count($multiValues) > 1) {
-                        $value = $multiValues;
-                    }else {
-                        $value = $filterFragments[5];
-                    }
-                }
-
-                if (strpos($field, '.') !== false) {
-                    $relational        = true;
-                    $relationFragments = explode('.', $field);
-                    $field             = array_pop($relationFragments);
-                    $relationName      = implode('.', $relationFragments);
-                }
-
-                $result[] = [
-                    'relational'   => $relational,
-                    'relationName' => $relationName,
-                    'field'        => $field,
-                    'compare'      => $compare,
-                    'value'        => $value
-                ];
+            if (!str_contains($filter, $this->comparisonSymbols)) {
+                return null;
             }
+
+            $filterFragments = $this->matchFilter($filter);
+            $relational      = false;
+            $relationName    = null;
+            list($field, $compare, $value) = array_slice($filterFragments, 1);
+
+            // One or multiple values
+            $value = (isset($filterFragments[5]) && $multiValues = explode('|',
+                    $filterFragments[5])) ? $multiValues : $value;
+
+            if (strpos($field, '.') !== false) {
+                $relational        = true;
+                $relationFragments = explode('.', $field);
+                $field             = array_pop($relationFragments);
+                $relationName      = implode('.', $relationFragments);
+            }
+
+            $result[] = [
+                'relational'   => $relational,
+                'relationName' => $relationName,
+                'field'        => $field,
+                'compare'      => $compare,
+                'value'        => $value
+            ];
         }
-        return !empty($result) ? $result : null;
+
+        return $result;
     }
 
     /**
@@ -109,10 +94,6 @@ class Request extends \Illuminate\Http\Request
         }
         $sort       = $this->get('sort');
         $parsedSort = array_filter(explode(',', $sort));
-
-        if (!is_array($parsedSort)) {
-            return null;
-        }
 
         $result = array_map(function ($sort){
 
@@ -150,10 +131,6 @@ class Request extends \Illuminate\Http\Request
         $relations       = $this->get('with');
         $parsedRelations = array_filter(explode(',', $relations));
 
-        if (!is_array($parsedRelations)) {
-            return null;
-        }
-
         $result = array_map(function ($relation){
 
             if (strpos($relation, '.') !== false) {
@@ -184,6 +161,11 @@ class Request extends \Illuminate\Http\Request
         return $result;
     }
 
+    /**
+     * Returns the pagination limit
+     *
+     * @return int|null
+     */
     public function getPerPage()
     {
         if ($this->has('limit')) {
@@ -195,6 +177,23 @@ class Request extends \Illuminate\Http\Request
         }
 
         return null;
+    }
+
+    /**
+     * Matches every filter string and converts it into fragments
+     *
+     * @param $filter
+     *
+     * @return array
+     */
+    protected function matchFilter($filter)
+    {
+        $filterFragments = [];
+        preg_match('/^([a-zA-Z0-9\-\_\.]+)(' . implode('|',
+                $this->comparisonSymbols) . '{1})(([a-zA-Z0-9\-\_\,]+)|\(([a-zA-Z0-9\-\_\,\|]+)\))$/', $filter,
+            $filterFragments);
+
+        return $filterFragments;
     }
 
 }
