@@ -2,9 +2,9 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-try{
+try {
     (new Dotenv\Dotenv(__DIR__ . '/../'))->load();
-}catch (Dotenv\Exception\InvalidPathException $e){
+}catch (Dotenv\Exception\InvalidPathException $e) {
     //
 }
 
@@ -91,7 +91,7 @@ $app->register(Prettus\Repository\Providers\LumenRepositoryServiceProvider::clas
 |
 */
 
-$app->group(['namespace' => 'App\Http\Controllers'], function ($app){
+$app->group([ 'namespace' => 'App\Http\Controllers' ], function($app) {
     require __DIR__ . '/../routes/web.php';
 });
 

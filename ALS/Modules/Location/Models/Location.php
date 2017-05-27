@@ -10,5 +10,5 @@ class Location extends Model
 
     protected $table = 'aw_location';
 
-    protected $guarded = [];
+    protected $guarded = [ ];
 }

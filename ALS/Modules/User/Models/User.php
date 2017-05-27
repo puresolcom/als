@@ -46,6 +46,6 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
 
     public function getFullName()
     {
-        return implode(' ', [$this->name, $this->last_name]);
+        return implode(' ', [ $this->name, $this->last_name ]);
     }
 }

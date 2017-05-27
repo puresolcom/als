@@ -32,7 +32,7 @@ class  ShipmentController extends Controller
     {
         try {
             $restQuery = $this->shipmentRepo->restQueryBuilder($request->getFields(), $request->getFilters(), $request->getSort(), $request->getRelations(), $request->getPerPage(), 'shipments');
-        } catch (\Exception $e) {
+        }catch (\Exception $e) {
             return $this->jsonResponse($e->getMessage(), 'Request Failed', 400);
         }
 

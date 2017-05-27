@@ -4,6 +4,11 @@ namespace ALS\Core\Pagination;
 
 class LengthAwarePaginator extends \Illuminate\Pagination\LengthAwarePaginator
 {
+    /**
+     * @param integer $total
+     * @param integer $perPage
+     * @param integer $currentPage
+     */
     public function __construct(
         $items,
         $total,

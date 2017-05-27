@@ -34,7 +34,7 @@ class AuthServiceProvider extends ServiceProvider
         // should return either a User instance or null. You're free to obtain
         // the User instance via an API token or any other method necessary.
 
-        $this->app['auth']->viaRequest('api', function ($request) {
+        $this->app[ 'auth' ]->viaRequest('api', function($request) {
 
             // Verify Authorization header is passed
             if ($request->header('Authorization')) {
@@ -50,7 +50,7 @@ class AuthServiceProvider extends ServiceProvider
                 }
 
                 // If everything goes well return user instance
-                return $userRepo->find((int) $token->key) ?? null;
+                return $userRepo->find((int)$token->key) ?? null;
             }
 
             return null;
