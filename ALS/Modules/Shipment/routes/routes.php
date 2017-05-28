@@ -2,9 +2,11 @@
 
 // Authentication required routes
 $app->group([
-    'middleware' => [ 'auth', 'role:manage-driver' ],
-], function() use ($app) {
-    $app->get('/', 'ShipmentController@list');
+    'middleware' => ['auth', 'role:manage-driver|drivers'],
+], function () use ($app) {
+    $app->get('/list', 'ShipmentController@list');
+    $app->get('/{id}', 'ShipmentController@get');
+    $app->get('/', 'ShipmentController@get');
 });
 
 // Guest routes

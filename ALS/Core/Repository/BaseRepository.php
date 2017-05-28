@@ -27,7 +27,7 @@ abstract class BaseRepository extends \Prettus\Repository\Eloquent\BaseRepositor
      */
     public function paginate(
         $limit = null,
-        $columns = [ '*' ],
+        $columns = ['*'],
         $method = "paginate",
         $dataKey = 'data'
     ) {
@@ -72,7 +72,7 @@ abstract class BaseRepository extends \Prettus\Repository\Eloquent\BaseRepositor
     }
 
     /**
-     * @param $fields
+     * @param                                     $fields
      * @param \Illuminate\Database\Eloquent\Model $results
      *
      * @return mixed
@@ -80,7 +80,7 @@ abstract class BaseRepository extends \Prettus\Repository\Eloquent\BaseRepositor
     protected function prepareColumns($fields, $results)
     {
         // Preparing select columns
-        $fields = !empty($fields) ? $fields : [ '*' ];
+        $fields = ! empty($fields) ? $fields : ['*'];
         if (is_array($fields)) {
             $results = $results->select($fields);
 
@@ -102,13 +102,13 @@ abstract class BaseRepository extends \Prettus\Repository\Eloquent\BaseRepositor
         if (is_array($relations)) {
             foreach ($relations as $relation) {
                 $results = $results->with([
-                    $relation[ 'relationName' ] => function($query) use (
+                    $relation['relationName'] => function ($query) use (
                         $relation
                     ) {
-                        if (count($relation[ 'relationFields' ]) > 0) {
-                            $fields = array_merge([ 'id' ], $relation[ 'relationFields' ]);
-                        }else {
-                            $fields = [ '*' ];
+                        if (count($relation['relationFields']) > 0) {
+                            $fields = array_merge(['id'], $relation['relationFields']);
+                        } else {
+                            $fields = ['*'];
                         }
 
                         return $query->select($fields);
@@ -153,20 +153,20 @@ abstract class BaseRepository extends \Prettus\Repository\Eloquent\BaseRepositor
      */
     protected function interpretFilterSymbols(Builder & $model, $filter)
     {
-        if (!isset($filter[ 'compare' ])) {
+        if (! isset($filter['compare'])) {
             return false;
         }
 
-        if (array_key_exists($filter[ 'compare' ], $this->symbolMap)) {
+        if (array_key_exists($filter['compare'], $this->symbolMap)) {
             // Convert symbols
-            $filter[ 'compare' ] = $this->symbolMap[ $filter[ 'compare' ] ];
+            $filter['compare'] = $this->symbolMap[$filter['compare']];
         }
 
-        if ($filter[ 'relational' ]) {
-            return $model->whereHas($filter[ 'relationName' ], function($query) use ($filter) {
+        if ($filter['relational']) {
+            return $model->whereHas($filter['relationName'], function ($query) use ($filter) {
                 return $this->appendClauses($query, $filter);
             });
-        }else {
+        } else {
             return $this->appendClauses($model, $filter);
         }
     }
@@ -182,19 +182,19 @@ abstract class BaseRepository extends \Prettus\Repository\Eloquent\BaseRepositor
     protected function appendClauses(&$model, $filter)
     {
         // Case null check
-        if (is_string($filter[ 'value' ]) && strtolower($filter[ 'value' ]) == 'NULL') {
-            if ($filter[ 'compare' ] == '=') {
-                return $model->whereNull($filter[ 'field' ]);
-            }else {
-                return $model->whereNotNull($filter[ 'field' ]);
+        if (is_string($filter['value']) && strtolower($filter['value']) == 'NULL') {
+            if ($filter['compare'] == '=') {
+                return $model->whereNull($filter['field']);
+            } else {
+                return $model->whereNotNull($filter['field']);
             }
-        }else {
+        } else {
             // Case of multiple values
-            if (is_array($filter[ 'value' ])) {
-                return $model->whereIn($filter[ 'field' ], $filter[ 'value' ]);
+            if (is_array($filter['value'])) {
+                return $model->whereIn($filter['field'], $filter['value']);
             }// Any other case
             else {
-                return $model->where($filter[ 'field' ], $filter[ 'compare' ], $filter[ 'value' ]);
+                return $model->where($filter['field'], $filter['compare'], $filter['value']);
             }
         }
     }
@@ -210,7 +210,7 @@ abstract class BaseRepository extends \Prettus\Repository\Eloquent\BaseRepositor
         // Preparing Sorting
         if (is_array($sort)) {
             foreach ($sort as $order) {
-                $results->orderBy($order[ 'orderBy' ], $order[ 'direction' ]);
+                $results->orderBy($order['orderBy'], $order['direction']);
             }
         }
 
@@ -219,8 +219,8 @@ abstract class BaseRepository extends \Prettus\Repository\Eloquent\BaseRepositor
 
     /**
      * @param integer|null $limit
-     * @param string $dataKey
-     * @param $results
+     * @param string       $dataKey
+     * @param              $results
      *
      * @return mixed
      */
@@ -229,6 +229,6 @@ abstract class BaseRepository extends \Prettus\Repository\Eloquent\BaseRepositor
         // Paginate
         $limit = is_null($limit) ? config('repository.pagination.limit', 20) : $limit;
 
-        return $this->parserResult($results->paginate($limit, [ '*' ], $pageName = 'page', $page = null, $dataKey));
+        return $this->parserResult($results->paginate($limit, ['*'], $pageName = 'page', $page = null, $dataKey));
     }
 }

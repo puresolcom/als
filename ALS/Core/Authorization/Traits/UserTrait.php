@@ -20,15 +20,15 @@ trait UserTrait
             foreach ($name as $roleName) {
                 $hasRole = $this->hasRole($roleName);
 
-                if ($hasRole && !$requireAll) {
+                if ($hasRole && ! $requireAll) {
                     return true;
-                } elseif (!$hasRole && $requireAll) {
+                } elseif (! $hasRole && $requireAll) {
                     return false;
                 }
             }
 
             return $requireAll;
-        }else {
+        } else {
             foreach ($this->getRoles() as $role) {
                 if ($role->name == $name) {
                     return true;
@@ -52,13 +52,17 @@ trait UserTrait
     /**
      * Verify if user owns an object
      *
-     * @param Model  $object
-     * @param string $referenceKey
+     * @param Model|array $object
+     * @param string      $referenceKey
      *
      * @return bool
      */
-    public function owns(Model $object, $referenceKey = 'user_id')
+    public function owns($object, $referenceKey = 'user_id')
     {
-        return $this->id == $object->{$referenceKey};
+        if (is_array($object)) {
+            return $this->id == $object[$referenceKey];
+        } else {
+            return $this->id == $object->{$referenceKey};
+        }
     }
 }

@@ -1,10 +1,10 @@
 <?php
 
-require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__.'/../vendor/autoload.php';
 
 try {
-    (new Dotenv\Dotenv(__DIR__ . '/../'))->load();
-}catch (Dotenv\Exception\InvalidPathException $e) {
+    (new Dotenv\Dotenv(__DIR__.'/../'))->load();
+} catch (Dotenv\Exception\InvalidPathException $e) {
     //
 }
 
@@ -19,9 +19,7 @@ try {
 |
 */
 
-$app = new Laravel\Lumen\Application(
-    realpath(__DIR__ . '/../')
-);
+$app = new Laravel\Lumen\Application(realpath(__DIR__.'/../'));
 
 $app->withEloquent();
 
@@ -36,15 +34,9 @@ $app->withEloquent();
 |
 */
 
-$app->singleton(
-    Illuminate\Contracts\Debug\ExceptionHandler::class,
-    ALS\Exceptions\Handler::class
-);
+$app->singleton(Illuminate\Contracts\Debug\ExceptionHandler::class, ALS\Exceptions\Handler::class);
 
-$app->singleton(
-    Illuminate\Contracts\Console\Kernel::class,
-    ALS\Console\Kernel::class
-);
+$app->singleton(Illuminate\Contracts\Console\Kernel::class, ALS\Console\Kernel::class);
 
 /*
 |--------------------------------------------------------------------------
@@ -59,7 +51,7 @@ $app->singleton(
 
 $app->routeMiddleware([
     'auth' => \ALS\Http\Middleware\Authenticate::class,
-    'role' => \ALS\Core\Authorization\Middleware\RoleMiddleware::class
+    'role' => \ALS\Core\Authorization\Middleware\RoleMiddleware::class,
 ]);
 
 /*
@@ -72,13 +64,13 @@ $app->routeMiddleware([
 | totally optional, so you are not required to uncomment this line.
 |
 */
+$app->register(Prettus\Repository\Providers\LumenRepositoryServiceProvider::class);
 $app->register(\ALS\Providers\AppServiceProvider::class);
 $app->register(\ALS\Providers\AuthServiceProvider::class);
 $app->register(\ALS\Core\Authorization\AuthorizationServiceProvider::class);
 $app->register(\ALS\Modules\User\Providers\ModuleServiceProvider::class);
 $app->register(\ALS\Modules\Option\Providers\ModuleServiceProvider::class);
 $app->register(\ALS\Modules\Shipment\Providers\ModuleServiceProvider::class);
-$app->register(Prettus\Repository\Providers\LumenRepositoryServiceProvider::class);
 
 /*
 |--------------------------------------------------------------------------
@@ -91,8 +83,8 @@ $app->register(Prettus\Repository\Providers\LumenRepositoryServiceProvider::clas
 |
 */
 
-$app->group([ 'namespace' => 'App\Http\Controllers' ], function($app) {
-    require __DIR__ . '/../routes/web.php';
+$app->group(['namespace' => 'App\Http\Controllers'], function ($app) {
+    require __DIR__.'/../routes/web.php';
 });
 
 return $app;
