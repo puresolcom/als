@@ -17,17 +17,7 @@ trait UserTrait
     public function hasRole($name, $requireAll = false)
     {
         if (is_array($name)) {
-            foreach ($name as $roleName) {
-                $hasRole = $this->hasRole($roleName);
-
-                if ($hasRole && ! $requireAll) {
-                    return true;
-                } elseif (! $hasRole && $requireAll) {
-                    return false;
-                }
-            }
-
-            return $requireAll;
+            return $this->checkMultipleRoles($name, $requireAll);
         } else {
             if (in_array($name, array_column($this->getRoles()->toArray(), 'name'))) {
                 return true;
@@ -62,5 +52,28 @@ trait UserTrait
         } else {
             return $this->id == $object->{$referenceKey};
         }
+    }
+
+    /**
+     * Check if user has one or more of the passed roles
+     *
+     * @param array $rolesNames
+     * @param bool  $requireAll
+     *
+     * @return bool
+     */
+    protected function checkMultipleRoles(array $rolesNames, bool $requireAll)
+    {
+        foreach ($rolesNames as $roleName) {
+            $hasRole = $this->hasRole($roleName);
+
+            if ($hasRole && ! $requireAll) {
+                return true;
+            } elseif (! $hasRole && $requireAll) {
+                return false;
+            }
+        }
+
+        return $requireAll;
     }
 }
