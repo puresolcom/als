@@ -161,9 +161,7 @@ class ShipmentRepository extends BaseRepository
         $customFilters = [];
 
         if (app('auth')->user()->hasRole('drivers')) {
-
-            $driver = app('auth')->user();
-
+            $driver        = app('auth')->user();
             $customFilters = [
                 ['field' => 'verified_by', 'compare' => '!=', 'value' => 0],
                 ['field' => 'verified_by', 'compare' => '!=', 'value' => null],
@@ -176,17 +174,7 @@ class ShipmentRepository extends BaseRepository
                 ],
             ];
         } else {
-            if (in_array('driver_id', array_values(array_column($requestFilters, 'field')))) {
-                foreach ($requestFilters as $filter) {
-                    if ($filter['field'] == 'driver_id') {
-                        $driverID = $filter['value'];
-                        break;
-                    }
-                }
-                $driver = $userRepo->find($driverID);
-            } else {
-                throw new \Exception('Cannot detect driver', 400);
-            }
+            $driver = $this->getDriverFromRequestFilter($requestFilters, $userRepo);
         }
 
         $todayBeginDate    = Carbon::today()->format('Y-m-d H:i:s');
@@ -215,5 +203,31 @@ class ShipmentRepository extends BaseRepository
         $data            = array_merge($data, $restQueryResult);
 
         return $data;
+    }
+
+    /**
+     * Get driver instance using the id from request filter
+     *
+     * @param $requestFilters
+     * @param $userRepo
+     *
+     * @return mixed
+     * @throws \Exception
+     */
+    protected function getDriverFromRequestFilter($requestFilters, $userRepo)
+    {
+        if (in_array('driver_id', array_values(array_column($requestFilters, 'field')))) {
+            foreach ($requestFilters as $filter) {
+                if ($filter['field'] == 'driver_id') {
+                    $driverID = $filter['value'];
+                    break;
+                }
+            }
+            $driver = $userRepo->find($driverID);
+
+            return $driver;
+        } else {
+            throw new \Exception('Cannot detect driver', 400);
+        }
     }
 }
