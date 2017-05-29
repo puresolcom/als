@@ -31,7 +31,7 @@ class ShipmentRepository extends BaseRepository
      * @return mixed
      * @throws \Exception
      */
-    public function getShipmentWithDriverAndDropdowns($id, DictionaryRepository $dictionaryRepo)
+    public function getShipmentWithDriverAndDropdowns($id)
     {
         $shipment = $this->with([
             'products',
@@ -44,6 +44,8 @@ class ShipmentRepository extends BaseRepository
         if (! $shipment) {
             throw new \Exception('Record cannot be found');
         }
+
+        $dictionaryRepo = $this->app->make(DictionaryRepository::class);
 
         $return['pending_threshold']               = 3;
         $return['shipment_data']                   = $shipment->toArray();
@@ -125,6 +127,17 @@ class ShipmentRepository extends BaseRepository
         return $analyzedFilters;
     }
 
+    /**
+     * Get Driver shipments along with all of its relations
+     *
+     * @param $requestRelations
+     * @param $requestFilters
+     *
+     * @deprecated 1.1 Old API Helper
+     *
+     * @return array
+     * @throws \Exception
+     */
     public function getDriverShipments($requestRelations, $requestFilters)
     {
         $dictionaryRepo = $this->app->make(DictionaryRepository::class);
