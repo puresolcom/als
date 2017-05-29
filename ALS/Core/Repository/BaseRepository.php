@@ -3,6 +3,7 @@
 namespace ALS\Core\Repository;
 
 use ALS\Core\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Concerns\QueriesRelationships;
 
 abstract class BaseRepository extends \Prettus\Repository\Eloquent\BaseRepository
 {
@@ -149,7 +150,7 @@ abstract class BaseRepository extends \Prettus\Repository\Eloquent\BaseRepositor
      * @param Builder $model
      * @param         $filter
      *
-     * @return bool|\Illuminate\Database\Eloquent\Builder
+     * @return bool|\Illuminate\Database\Eloquent\Builder|QueriesRelationships
      */
     protected function interpretFilterSymbols(Builder & $model, $filter)
     {
@@ -162,7 +163,7 @@ abstract class BaseRepository extends \Prettus\Repository\Eloquent\BaseRepositor
             $filter['compare'] = $this->symbolMap[$filter['compare']];
         }
 
-        if (isset($filter['relational']) && $filter['relational']) {
+        if (isset($filter['relational']) && true === $filter['relational']) {
             return $model->whereHas($filter['relationName'], function ($query) use ($filter) {
                 return $this->appendClauses($query, $filter);
             });
