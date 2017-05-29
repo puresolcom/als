@@ -22,9 +22,9 @@ class OptionRepository extends BaseRepository
      */
     public function get($module, $key = null)
     {
-        $filter = [ 'module' => $module ];
-        if (!is_null($key)) {
-            $filter[ 'key' ] = $key;
+        $filter = ['module' => $module];
+        if (! is_null($key)) {
+            $filter['key'] = $key;
         }
 
         return $this->findWhere($filter)->first();

@@ -10,7 +10,7 @@ class Group extends Model
 
     protected $table = 'aw_group';
 
-    protected $guarded = [ ];
+    protected $guarded = [];
 
-    protected $hidden = [ 'pivot' ];
+    protected $hidden = ['pivot'];
 }

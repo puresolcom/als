@@ -10,7 +10,7 @@ trait RestfulResponseTrait
         $content,
         $message = 'OK',
         $status = 200,
-        $errors = [ ]
+        $errors = []
     ) {
         $formattedContent = [
             'api'    => [
@@ -33,9 +33,9 @@ trait RestfulResponseTrait
         $content,
         $status = 200,
         $contentType = 'application/json',
-        $headers = [ ]
+        $headers = []
     ) {
-        $headers = array_merge([ 'Content-Type' => $contentType ], $headers);
+        $headers = array_merge(['Content-Type' => $contentType], $headers);
 
         return new Response($content, $status, $headers);
     }

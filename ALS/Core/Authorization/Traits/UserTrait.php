@@ -28,6 +28,29 @@ trait UserTrait
     }
 
     /**
+     * Check if user has one or more of the passed roles
+     *
+     * @param array $rolesNames
+     * @param bool  $requireAll
+     *
+     * @return bool
+     */
+    protected function checkMultipleRoles(array $rolesNames, bool $requireAll)
+    {
+        foreach ($rolesNames as $roleName) {
+            $hasRole = $this->hasRole($roleName);
+
+            if ($hasRole && ! $requireAll) {
+                return true;
+            } elseif (! $hasRole && $requireAll) {
+                return false;
+            }
+        }
+
+        return $requireAll;
+    }
+
+    /**
      * Get current user roles
      *
      * @return mixed
@@ -52,28 +75,5 @@ trait UserTrait
         } else {
             return $this->id == $object->{$referenceKey};
         }
-    }
-
-    /**
-     * Check if user has one or more of the passed roles
-     *
-     * @param array $rolesNames
-     * @param bool  $requireAll
-     *
-     * @return bool
-     */
-    protected function checkMultipleRoles(array $rolesNames, bool $requireAll)
-    {
-        foreach ($rolesNames as $roleName) {
-            $hasRole = $this->hasRole($roleName);
-
-            if ($hasRole && ! $requireAll) {
-                return true;
-            } elseif (! $hasRole && $requireAll) {
-                return false;
-            }
-        }
-
-        return $requireAll;
     }
 }

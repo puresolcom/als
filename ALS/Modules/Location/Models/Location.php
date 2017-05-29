@@ -12,13 +12,13 @@ class Location extends Model
 
     protected $guarded = [];
 
-    public function parent()
-    {
-        return $this->belongsTo(Location::class, 'parent_id', 'id');
-    }
-
     public function recursiveParents()
     {
         return $this->parent()->with('recursiveParents');
+    }
+
+    public function parent()
+    {
+        return $this->belongsTo(Location::class, 'parent_id', 'id');
     }
 }

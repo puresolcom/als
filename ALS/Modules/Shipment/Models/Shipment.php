@@ -18,11 +18,6 @@ class Shipment extends Model
 
     protected $guarded = [];
 
-    public function driver()
-    {
-        return $this->hasOne(User::class, 'id', 'emp_drive_id');
-    }
-
     public function assigner()
     {
         return $this->hasOne(User::class, 'id', 'emp_assigned_by');
@@ -31,6 +26,11 @@ class Shipment extends Model
     public function driverDetails()
     {
         return $this->driver();
+    }
+
+    public function driver()
+    {
+        return $this->hasOne(User::class, 'id', 'emp_drive_id');
     }
 
     public function products()
@@ -43,19 +43,14 @@ class Shipment extends Model
         return $this->hasOne(Location::class, 'id', 'location_id');
     }
 
-    public function paymentMethod()
-    {
-        return $this->hasOne(Dictionary::class, 'id', 'pay_method');
-    }
-
     public function shipmentPaymentMethod()
     {
         return $this->paymentMethod();
     }
 
-    public function reason()
+    public function paymentMethod()
     {
-        return $this->hasOne(Dictionary::class, 'id', 'reason_id');
+        return $this->hasOne(Dictionary::class, 'id', 'pay_method');
     }
 
     public function shipmentReason()
@@ -63,9 +58,9 @@ class Shipment extends Model
         return $this->reason();
     }
 
-    public function status()
+    public function reason()
     {
-        return $this->hasOne(Dictionary::class, 'id', 'status_id');
+        return $this->hasOne(Dictionary::class, 'id', 'reason_id');
     }
 
     public function report()
@@ -76,6 +71,11 @@ class Shipment extends Model
     public function shipmentStatus()
     {
         return $this->status();
+    }
+
+    public function status()
+    {
+        return $this->hasOne(Dictionary::class, 'id', 'status_id');
     }
 
     public function transit()

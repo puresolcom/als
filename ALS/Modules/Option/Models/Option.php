@@ -10,5 +10,5 @@ class Option extends Model
 
     protected $table = 'aw_option';
 
-    protected $guarded = [ ];
+    protected $guarded = [];
 }
