@@ -29,10 +29,8 @@ trait UserTrait
 
             return $requireAll;
         } else {
-            foreach ($this->getRoles() as $role) {
-                if ($role->name == $name) {
-                    return true;
-                }
+            if (in_array($name, array_column($this->getRoles()->toArray(), 'name'))) {
+                return true;
             }
         }
 

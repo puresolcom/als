@@ -148,30 +148,12 @@ class ShipmentRepository extends BaseRepository
 
         // Required Relations
         $customRelations = [
-            [
-                'relationName'   => 'location',
-                'relationFields' => [],
-            ],
-            [
-                'relationName'   => 'location.recursiveParents',
-                'relationFields' => [],
-            ],
-            [
-                'relationName'   => 'status',
-                'relationFields' => ['id', 'value'],
-            ],
-            [
-                'relationName'   => 'reason',
-                'relationFields' => ['id', 'value'],
-            ],
-            [
-                'relationName'   => 'assigner',
-                'relationFields' => ['id', 'name', 'last_name'],
-            ],
-            [
-                'relationName'   => 'transit',
-                'relationFields' => [],
-            ],
+            ['relationName' => 'location', 'relationFields' => []],
+            ['relationName' => 'location.recursiveParents', 'relationFields' => []],
+            ['relationName' => 'status', 'relationFields' => ['id', 'value']],
+            ['relationName' => 'reason', 'relationFields' => ['id', 'value']],
+            ['relationName' => 'assigner', 'relationFields' => ['id', 'name', 'last_name']],
+            ['relationName' => 'transit', 'relationFields' => []],
         ];
 
         $relations = array_merge((array) $requestRelations, $customRelations);
@@ -182,28 +164,16 @@ class ShipmentRepository extends BaseRepository
 
             $driver = app('auth')->user();
 
-            $customFilters[] = [
-                'relational'   => false,
-                'relationName' => null,
-                'field'        => 'verified_by',
-                'compare'      => '!=',
-                'value'        => 0,
-            ];
-
-            $customFilters[] = [
-                'relational'   => false,
-                'relationName' => null,
-                'field'        => 'verified_by',
-                'compare'      => '!=',
-                'value'        => null,
-            ];
-
-            $customFilters[] = [
-                'relational'   => true,
-                'relationName' => 'report',
-                'field'        => 'status_id',
-                'compare'      => ':',
-                'value'        => $reportAcknowledgedStatus->id,
+            $customFilters = [
+                ['field' => 'verified_by', 'compare' => '!=', 'value' => 0],
+                ['field' => 'verified_by', 'compare' => '!=', 'value' => null],
+                [
+                    'relational'   => true,
+                    'relationName' => 'report',
+                    'field'        => 'status_id',
+                    'compare'      => ':',
+                    'value'        => $reportAcknowledgedStatus->id,
+                ],
             ];
         } else {
             if (in_array('driver_id', array_values(array_column($requestFilters, 'field')))) {
@@ -219,23 +189,11 @@ class ShipmentRepository extends BaseRepository
             }
         }
 
-        $customFilters[] = [
-            'relational'   => false,
-            'relationName' => null,
-            'field'        => 'updated_at',
-            'compare'      => '>',
-            'value'        => Carbon::today()->format('Y-m-d H:i:s'),
-        ];
-
-        $customFilters[] = [
-            'relational'   => false,
-            'relationName' => null,
-            'field'        => 'updated_at',
-            'compare'      => '<',
-            'value'        => Carbon::tomorrow()->format('Y-m-d H:i:s'),
-        ];
-
-        $filters = array_merge((array) $requestFilters, $customFilters);
+        $todayBeginDate    = Carbon::today()->format('Y-m-d H:i:s');
+        $tomorrowBeginDate = Carbon::tomorrow()->format('Y-m-d H:i:s');
+        $customFilters[]   = ['field' => 'updated_at', 'compare' => '>', 'value' => $todayBeginDate];
+        $customFilters[]   = ['field' => 'updated_at', 'compare' => '<', 'value' => $tomorrowBeginDate];
+        $filters           = array_merge((array) $requestFilters, $customFilters);
 
         $driverReport = $reportRepo->findOrCreate($driver->id, null, false);
 

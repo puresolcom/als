@@ -162,7 +162,7 @@ abstract class BaseRepository extends \Prettus\Repository\Eloquent\BaseRepositor
             $filter['compare'] = $this->symbolMap[$filter['compare']];
         }
 
-        if ($filter['relational']) {
+        if (isset($filter['relational']) && $filter['relational']) {
             return $model->whereHas($filter['relationName'], function ($query) use ($filter) {
                 return $this->appendClauses($query, $filter);
             });
