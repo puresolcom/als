@@ -3,6 +3,7 @@
 namespace ALS\Modules\Shipment\Models;
 
 use ALS\Core\Eloquent\Model;
+use ALS\Models\Transient;
 use ALS\Modules\Dictionary\Models\Dictionary;
 use ALS\Modules\Location\Models\Location;
 use ALS\Modules\Product\Models\Product;
@@ -19,7 +20,12 @@ class Shipment extends Model
 
     public function driver()
     {
-        return $this->belongsTo(User::class, 'emp_driver_id', 'id');
+        return $this->hasOne(User::class, 'id', 'emp_drive_id');
+    }
+
+    public function assigner()
+    {
+        return $this->hasOne(User::class, 'id', 'emp_assigned_by');
     }
 
     public function driverDetails()
@@ -70,5 +76,10 @@ class Shipment extends Model
     public function shipmentStatus()
     {
         return $this->status();
+    }
+
+    public function transit()
+    {
+        return $this->hasOne(Transient::class, 'value', 'id');
     }
 }

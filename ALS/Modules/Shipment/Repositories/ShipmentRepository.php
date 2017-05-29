@@ -4,7 +4,10 @@ namespace ALS\Modules\Shipment\Repositories;
 
 use ALS\Core\Repository\BaseRepository;
 use ALS\Modules\Dictionary\Repositories\DictionaryRepository;
+use ALS\Modules\Report\Repositories\ReportRepository;
 use ALS\Modules\Shipment\Models\Shipment;
+use ALS\Modules\User\Repositories\UserRepository;
+use Carbon\Carbon;
 
 class ShipmentRepository extends BaseRepository
 {
@@ -73,7 +76,10 @@ class ShipmentRepository extends BaseRepository
         $data = $this->restQueryBuilder($fields, $filters, $sort, $relations, $limit, $dataKey)->toArray();
 
         foreach ($data[$dataKey] as $i => $record) {
-            $data[$dataKey][$i]['status'] = $data[$dataKey][$i]['status']['value'];
+            $data[$dataKey][$i]['status']      = $data[$dataKey][$i]['status']['value'];
+            $data[$dataKey][$i]['reason']      = $data[$dataKey][$i]['reason']['value'];
+            $data[$dataKey][$i]['assigned_by'] = $data[$dataKey][$i]['assigner']['name'].' '.$data[$dataKey][$i]['assigner']['last_name'];
+            $data[$dataKey][$i]['in_transit']  = is_array($data[$dataKey][$i]['transit']);
 
             // Converting nested location to flat location to support old API consumers
             if (isset($record['location'])) {
@@ -117,5 +123,126 @@ class ShipmentRepository extends BaseRepository
         }
 
         return $analyzedFilters;
+    }
+
+    public function getDriverShipments($requestRelations, $requestFilters)
+    {
+        $dictionaryRepo = $this->app->make(DictionaryRepository::class);
+        $userRepo       = $this->app->make(UserRepository::class);
+        $reportRepo     = $this->app->make(ReportRepository::class);
+
+        $reportAcknowledgedStatus = $dictionaryRepo->get('report_status', 'acknowledged')->first();
+
+        // Required Relations
+        $customRelations = [
+            [
+                'relationName'   => 'location',
+                'relationFields' => [],
+            ],
+            [
+                'relationName'   => 'location.recursiveParents',
+                'relationFields' => [],
+            ],
+            [
+                'relationName'   => 'status',
+                'relationFields' => ['id', 'value'],
+            ],
+            [
+                'relationName'   => 'reason',
+                'relationFields' => ['id', 'value'],
+            ],
+            [
+                'relationName'   => 'assigner',
+                'relationFields' => ['id', 'name', 'last_name'],
+            ],
+            [
+                'relationName'   => 'transit',
+                'relationFields' => [],
+            ],
+        ];
+
+        $relations = array_merge((array) $requestRelations, $customRelations);
+
+        $customFilters = [];
+
+        if (app('auth')->user()->hasRole('drivers')) {
+
+            $driver = app('auth')->user();
+
+            $customFilters[] = [
+                'relational'   => false,
+                'relationName' => null,
+                'field'        => 'verified_by',
+                'compare'      => '!=',
+                'value'        => 0,
+            ];
+
+            $customFilters[] = [
+                'relational'   => false,
+                'relationName' => null,
+                'field'        => 'verified_by',
+                'compare'      => '!=',
+                'value'        => null,
+            ];
+
+            $customFilters[] = [
+                'relational'   => true,
+                'relationName' => 'report',
+                'field'        => 'status_id',
+                'compare'      => ':',
+                'value'        => $reportAcknowledgedStatus->id,
+            ];
+        } else {
+            if (in_array('driver_id', array_values(array_column($requestFilters, 'field')))) {
+                foreach ($requestFilters as $filter) {
+                    if ($filter['field'] == 'driver_id') {
+                        $driverID = $filter['value'];
+                        break;
+                    }
+                }
+                $driver = $userRepo->find($driverID);
+            } else {
+                throw new \Exception('Cannot detect driver', 400);
+            }
+        }
+
+        $customFilters[] = [
+            'relational'   => false,
+            'relationName' => null,
+            'field'        => 'updated_at',
+            'compare'      => '>',
+            'value'        => Carbon::today()->format('Y-m-d H:i:s'),
+        ];
+
+        $customFilters[] = [
+            'relational'   => false,
+            'relationName' => null,
+            'field'        => 'updated_at',
+            'compare'      => '<',
+            'value'        => Carbon::tomorrow()->format('Y-m-d H:i:s'),
+        ];
+
+        $filters = array_merge((array) $requestFilters, $customFilters);
+
+        $driverReport = $reportRepo->findOrCreate($driver->id, null, false);
+
+        $data              = [];
+        $data['shipments'] = [];
+        $data['driver']    = $driver;
+
+        if (! $driverReport) {
+            throw new \Exception('No driver report can be found', 200);
+        }
+
+        $data['driver']['report_id']     = $driverReport->id;
+        $data['driver']['report_status'] = $driverReport->status;
+
+        if ($driverReport->status->id == $reportAcknowledgedStatus->id && app('auth')->user()->hasRole('manage-driver')) {
+            throw new \Exception('Report is in acknowledged status', 200);
+        }
+        $restQueryResult = $this->restQueryDriverShipments(null, $filters, null, $relations, 1000, 'shipments');
+        $data            = array_merge($data, $restQueryResult);
+
+        return $data;
     }
 }

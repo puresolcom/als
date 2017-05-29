@@ -6,7 +6,9 @@ use ALS\Core\Authorization\Exceptions\UnauthorizedAccess;
 use ALS\Core\Http\Request;
 use ALS\Http\Controllers\Controller;
 use ALS\Modules\Dictionary\Repositories\DictionaryRepository;
+use ALS\Modules\Report\Repositories\ReportRepository;
 use ALS\Modules\Shipment\Repositories\ShipmentRepository;
+use ALS\Modules\User\Repositories\UserRepository;
 
 /**
  * Class ShipmentController
@@ -25,11 +27,21 @@ class  ShipmentController extends Controller
         $this->shipmentRepo = $shipmentRepo;
     }
 
-    public function get(Request $request, DictionaryRepository $dictionaryRepo, $id = null)
-    {
-        // Show driver active shipments
-        if (app('auth')->user()->hasRole('drivers') && $id === null) {
-            return $this->getDriverShipments($request, $dictionaryRepo);
+    public function get(
+        Request $request,
+        DictionaryRepository $dictionaryRepo,
+        ReportRepository $reportRepo,
+        UserRepository $userRepo,
+        $id = null
+    ) {
+        // Show driver active verified shipments
+        if (app('auth')->user()->hasRole(['drivers', 'manage-driver']) && $id === null) {
+            try {
+                return $this->jsonResponse($this->shipmentRepo->getDriverShipments($request->getRelations(), $request->getFilters()));
+            } catch (\Exception $e) {
+                return $this->jsonResponse(null, $e->getMessage(), $e->getCode() ?? 400);
+            }
+            // Show driver active shipments
         } elseif ($id !== null) {
             try {
                 $data = $this->shipmentRepo->getShipmentWithDriverAndDropdowns($id, $dictionaryRepo);
@@ -44,51 +56,6 @@ class  ShipmentController extends Controller
         } else {
             return $this->list($request);
         }
-    }
-
-    protected function getDriverShipments(Request $request, DictionaryRepository $dictionaryRepo)
-    {
-
-        $requestRelations = $request->getRelations() ?? [];
-        $requestFilters   = $request->getFilters() ?? [];
-
-        // Required Relations
-        $customRelations = [
-            [
-                'relationName'   => 'location',
-                'relationFields' => [],
-            ],
-            [
-                'relationName'   => 'location.recursiveParents',
-                'relationFields' => [],
-            ],
-            [
-                'relationName'   => 'status',
-                'relationFields' => ['id', 'value'],
-            ],
-        ];
-
-        $relations = array_merge($requestRelations, $customRelations);
-
-        $customFilters = [
-            [
-                'relational'   => true,
-                'relationName' => 'report',
-                'field'        => 'status_id',
-                'compare'      => ':',
-                'value'        => $dictionaryRepo->get('report_status', 'acknowledged')->first()->id,
-            ],
-        ];
-
-        $filters = array_merge($requestFilters, $customFilters);
-
-        try {
-            $restQuery = $this->shipmentRepo->restQueryDriverShipments($request->getFields(), $filters, $request->getSort(), $relations, $request->getPerPage(), 'shipments');
-        } catch (\Exception $e) {
-            return $this->jsonResponse(null, 'Request Failed', 400, $e->getMessage());
-        }
-
-        return $this->jsonResponse($restQuery);
     }
 
     public function list(Request $request)
