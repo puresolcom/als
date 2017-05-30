@@ -30,7 +30,7 @@ class Shipment extends Model
 
     public function driver()
     {
-        return $this->hasOne(User::class, 'id', 'emp_drive_id');
+        return $this->hasOne(User::class, 'id', 'emp_driver_id');
     }
 
     public function products()

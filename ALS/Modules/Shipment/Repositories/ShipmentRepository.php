@@ -24,7 +24,6 @@ class ShipmentRepository extends BaseRepository
      * Get shipment along with its driver details, products and dropdowns and any related content
      *
      * @param                                                           $id
-     * @param \ALS\Modules\Dictionary\Repositories\DictionaryRepository $dictionaryRepo
      *
      * @deprecated 1.1.0 Used to support old API consumers
      *
@@ -39,7 +38,7 @@ class ShipmentRepository extends BaseRepository
             'shipmentPaymentMethod',
             'shipmentStatus',
             'shipmentReason',
-        ])->findWhere(['id' => $id])->first();
+        ])->find($id);
 
         if (! $shipment) {
             throw new \Exception('Record cannot be found');
@@ -62,6 +61,69 @@ class ShipmentRepository extends BaseRepository
         ];
 
         return $return;
+    }
+
+    public function restQueryDriverShipments(
+        $fields = null,
+        $filters = null,
+        $sort = null,
+        $relations = null,
+        $limit = null,
+        $dataKey = 'data'
+    ) {
+        // Mapping old API filter field names to real names
+        $filters = $this->mapFiltersAliases($filters);
+
+        $data = $this->restQueryBuilder($fields, $filters, $sort, $relations, $limit, $dataKey)->toArray();
+
+        foreach ($data[$dataKey] as $i => $record) {
+            $data[$dataKey][$i]['status']      = $data[$dataKey][$i]['status']['value'];
+            $data[$dataKey][$i]['reason']      = $data[$dataKey][$i]['reason']['value'];
+            $data[$dataKey][$i]['assigned_by'] = $data[$dataKey][$i]['assigner']['name'].' '.$data[$dataKey][$i]['assigner']['last_name'];
+            $data[$dataKey][$i]['in_transit']  = is_array($data[$dataKey][$i]['transit']);
+
+            // Converting nested location to flat location to support old API consumers
+            if (isset($record['location'])) {
+                $data[$dataKey][$i]['region'] = array_filter($record['location'], function ($data) {
+                    return ! is_array($data);
+                });
+                $data[$dataKey][$i]['city']   = array_filter($record['location']['recursive_parents'], function ($data
+                ) {
+                    return ! is_array($data);
+                });
+
+                $data[$dataKey][$i]['country'] = array_filter($record['location']['recursive_parents']['recursive_parents'], function (
+                    $data
+                ) {
+                    return ! is_array($data);
+                });
+
+                unset($data[$dataKey][$i]['location']);
+            }
+        }
+
+        return $data;
+    }
+
+    protected function mapFiltersAliases($filters)
+    {
+
+        if (! is_array($filters)) {
+            return false;
+        }
+
+        $analyzedFilters = [];
+        foreach ($filters as $filter) {
+            if (array_key_exists($filter['field'], $this->aliases)) {
+                $filter['field']   = $this->aliases[$filter['field']];
+                $analyzedFilters[] = $filter;
+
+                continue;
+            }
+            $analyzedFilters[] = $filter;
+        }
+
+        return $analyzedFilters;
     }
 
     /**
@@ -166,68 +228,5 @@ class ShipmentRepository extends BaseRepository
         } else {
             throw new \Exception('Cannot detect driver', 400);
         }
-    }
-
-    public function restQueryDriverShipments(
-        $fields = null,
-        $filters = null,
-        $sort = null,
-        $relations = null,
-        $limit = null,
-        $dataKey = 'data'
-    ) {
-        // Mapping old API filter field names to real names
-        $filters = $this->mapFiltersAliases($filters);
-
-        $data = $this->restQueryBuilder($fields, $filters, $sort, $relations, $limit, $dataKey)->toArray();
-
-        foreach ($data[$dataKey] as $i => $record) {
-            $data[$dataKey][$i]['status']      = $data[$dataKey][$i]['status']['value'];
-            $data[$dataKey][$i]['reason']      = $data[$dataKey][$i]['reason']['value'];
-            $data[$dataKey][$i]['assigned_by'] = $data[$dataKey][$i]['assigner']['name'].' '.$data[$dataKey][$i]['assigner']['last_name'];
-            $data[$dataKey][$i]['in_transit']  = is_array($data[$dataKey][$i]['transit']);
-
-            // Converting nested location to flat location to support old API consumers
-            if (isset($record['location'])) {
-                $data[$dataKey][$i]['region'] = array_filter($record['location'], function ($data) {
-                    return ! is_array($data);
-                });
-                $data[$dataKey][$i]['city']   = array_filter($record['location']['recursive_parents'], function ($data
-                ) {
-                    return ! is_array($data);
-                });
-
-                $data[$dataKey][$i]['country'] = array_filter($record['location']['recursive_parents']['recursive_parents'], function (
-                    $data
-                ) {
-                    return ! is_array($data);
-                });
-
-                unset($data[$dataKey][$i]['location']);
-            }
-        }
-
-        return $data;
-    }
-
-    protected function mapFiltersAliases($filters)
-    {
-
-        if (! is_array($filters)) {
-            return false;
-        }
-
-        $analyzedFilters = [];
-        foreach ($filters as $filter) {
-            if (array_key_exists($filter['field'], $this->aliases)) {
-                $filter['field']   = $this->aliases[$filter['field']];
-                $analyzedFilters[] = $filter;
-
-                continue;
-            }
-            $analyzedFilters[] = $filter;
-        }
-
-        return $analyzedFilters;
     }
 }
