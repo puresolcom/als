@@ -232,4 +232,11 @@ abstract class BaseRepository extends \Prettus\Repository\Eloquent\BaseRepositor
 
         return $this->parserResult($results->paginate($limit, ['*'], $pageName = 'page', $page = null, $dataKey));
     }
+
+    protected function rawWhere($rawQuery, $where)
+    {
+        $this->applyConditions($where);
+
+        return $this->parserResult($this->model->select($this->app->db->raw($rawQuery)));
+    }
 }

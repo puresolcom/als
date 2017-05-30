@@ -91,6 +91,20 @@ class ShipmentRepository extends BaseRepository
         return $return;
     }
 
+    /**
+     * Prepares a Restful shipment query for older API Versions
+     *
+     * @param null   $fields
+     * @param null   $filters
+     * @param null   $sort
+     * @param null   $relations
+     * @param null   $limit
+     * @param string $dataKey
+     *
+     * @deprecated 1.1.0 Used to support old API consumers
+     *
+     * @return mixed
+     */
     public function restQueryDriverShipments(
         $fields = null,
         $filters = null,
@@ -133,6 +147,13 @@ class ShipmentRepository extends BaseRepository
         return $data;
     }
 
+    /**
+     * Maps request filter aliases to it's corresponding field name
+     *
+     * @param $filters
+     *
+     * @return array|bool
+     */
     protected function mapFiltersAliases($filters)
     {
 
