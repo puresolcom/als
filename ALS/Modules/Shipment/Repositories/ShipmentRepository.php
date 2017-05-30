@@ -39,12 +39,12 @@ class ShipmentRepository extends BaseRepository
             throw new \Exception('Record cannot be found');
         }
 
-        $shipment['shipment_reason'] = [
+        $return['shipment_reason'] = [
             'shipment_reason_id'   => $shipment['shipment_reason']['id'] ?? '',
             'shipment_reason_name' => $shipment['shipment_reason']['value'] ?? '',
         ];
 
-        $shipment['shipment_status'] = [
+        $return['shipment_status'] = [
             'shipment_status_id'   => $shipment['shipment_status']['id'] ?? '',
             'shipment_status_key'  => $shipment['shipment_status']['key'] ?? '',
             'shipment_status_name' => $shipment['shipment_status']['value'] ?? '',
@@ -61,6 +61,9 @@ class ShipmentRepository extends BaseRepository
 
         $return['pending_threshold']               = '3';
         $return['shipment_data']                   = $shipment;
+        $return['products']                        = $shipment['products'];
+        $return['shipment_payment_method']         = $shipment['shipment_payment_method'];
+        $return['driver_details']                  = $shipment['driver_details'];
         $return['dropdown']['status']              = $dictionaryRepo->get('shipment_status');
         $return['dropdown']['reason']['pending']   = $dictionaryRepo->get('reason', 'pending');
         $return['dropdown']['reason']['cancelled'] = $dictionaryRepo->get('reason', 'cancelled');
@@ -72,6 +75,8 @@ class ShipmentRepository extends BaseRepository
             'out_for_delivery' => $dictionaryRepo->get('sms_message', 'out_for_delivery'),
             'picked-up'        => $dictionaryRepo->get('sms_message', 'picked-up'),
         ];
+
+        unset($shipment['shipment_reason'], $shipment['shipment_status'], $shipment['products'], $shipment['shipment_payment_method'], $shipment['driver_details']);
 
         return $return;
     }
