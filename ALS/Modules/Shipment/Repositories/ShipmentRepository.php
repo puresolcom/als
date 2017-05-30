@@ -74,6 +74,15 @@ class ShipmentRepository extends BaseRepository
             'picked-up'        => $dictionaryRepo->get('sms_message', 'picked-up'),
         ];
 
+        if (empty($shipment['additional_data'])) {
+            unset($shipment['additional_data']);
+        } else {
+            $shipment['additional_data'] = unserialize($shipment['additional_data']);
+            if (! is_array($shipment['additional_data']) && ! is_object($shipment['additional_data'])) {
+                unset($shipment['additional_data']);
+            }
+        }
+
         // due amount for collection
         $amountDue              = ( float ) $shipment['amount_order'] - ( float ) $shipment['amount_paid'] - ( float ) $shipment['amount_collected'];
         $shipment['amount_due'] = number_format($amountDue, '2', '.', '');
