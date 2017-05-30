@@ -32,19 +32,21 @@ class ShipmentRepository extends BaseRepository
      */
     public function getShipmentWithDriverAndDropdowns($id)
     {
-        $shipment = $this->with([
-            'products',
-            'driverDetails',
-            'shipmentPaymentMethod',
-            'shipmentStatus',
-            'shipmentReason',
-        ])->find($id);
+        $relations = ['products', 'driverDetails', 'shipmentPaymentMethod', 'shipmentStatus', 'shipmentReason'];
+        $shipment  = $this->with($relations)->find($id)->toArray();
 
         if (! $shipment) {
             throw new \Exception('Record cannot be found');
         }
 
         $dictionaryRepo = $this->app->make(DictionaryRepository::class);
+
+        foreach ($relations as $relation) {
+            $relationKey = snake_case($relation);
+            if (isset($relationKey) && is_null($shipment[snake_case($relation)])) {
+                $shipment[$relationKey] = [];
+            }
+        }
 
         $return['pending_threshold']               = '3';
         $return['shipment_data']                   = $shipment;
