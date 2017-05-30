@@ -39,17 +39,6 @@ class ShipmentRepository extends BaseRepository
             throw new \Exception('Record cannot be found');
         }
 
-        $return['shipment_reason'] = [
-            'shipment_reason_id'   => $shipment['shipment_reason']['id'] ?? '',
-            'shipment_reason_name' => $shipment['shipment_reason']['value'] ?? '',
-        ];
-
-        $return['shipment_status'] = [
-            'shipment_status_id'   => $shipment['shipment_status']['id'] ?? '',
-            'shipment_status_key'  => $shipment['shipment_status']['key'] ?? '',
-            'shipment_status_name' => $shipment['shipment_status']['value'] ?? '',
-        ];
-
         $dictionaryRepo = $this->app->make(DictionaryRepository::class);
 
         foreach ($relations as $relation) {
@@ -60,9 +49,18 @@ class ShipmentRepository extends BaseRepository
         }
 
         $return['pending_threshold']               = '3';
-        $return['shipment_data']                   = $shipment;
+        $return['shipment_data']                   = &$shipment;
         $return['products']                        = $shipment['products'];
         $return['shipment_payment_method']         = $shipment['shipment_payment_method'];
+        $return['shipment_reason']                 = [
+            'shipment_reason_id'   => $shipment['shipment_reason']['id'] ?? '',
+            'shipment_reason_name' => $shipment['shipment_reason']['value'] ?? '',
+        ];
+        $return['shipment_status']                 = [
+            'shipment_status_id'   => $shipment['shipment_status']['id'] ?? '',
+            'shipment_status_key'  => $shipment['shipment_status']['key'] ?? '',
+            'shipment_status_name' => $shipment['shipment_status']['value'] ?? '',
+        ];
         $return['driver_details']                  = $shipment['driver_details'];
         $return['dropdown']['status']              = $dictionaryRepo->get('shipment_status');
         $return['dropdown']['reason']['pending']   = $dictionaryRepo->get('reason', 'pending');
