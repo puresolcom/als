@@ -69,8 +69,8 @@ $app->routeMiddleware([
 |
 */
 $app->register(Prettus\Repository\Providers\LumenRepositoryServiceProvider::class);
-$app->register(\ALS\Providers\CatchAllOptionsRequestsProvider::class);
 $app->register(\ALS\Providers\AppServiceProvider::class);
+$app->register(\ALS\Providers\CatchAllOptionsRequestsProvider::class);
 $app->register(\ALS\Providers\AuthServiceProvider::class);
 $app->register(\ALS\Core\Authorization\AuthorizationServiceProvider::class);
 $app->register(\ALS\Modules\User\Providers\ModuleServiceProvider::class);
