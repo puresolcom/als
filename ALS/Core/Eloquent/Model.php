@@ -4,6 +4,8 @@ namespace ALS\Core\Eloquent;
 
 class Model extends \Illuminate\Database\Eloquent\Model
 {
+    public $incrementing = false;
+
     /**
      * Create a new Eloquent query builder for the model.
      *
