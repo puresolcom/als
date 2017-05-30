@@ -46,8 +46,8 @@ class ShipmentRepository extends BaseRepository
 
         $dictionaryRepo = $this->app->make(DictionaryRepository::class);
 
-        $return['pending_threshold']               = 3;
-        $return['shipment_data']                   = $shipment->toArray();
+        $return['pending_threshold']               = '3';
+        $return['shipment_data']                   = $shipment;
         $return['dropdown']['status']              = $dictionaryRepo->get('shipment_status');
         $return['dropdown']['reason']['pending']   = $dictionaryRepo->get('reason', 'pending');
         $return['dropdown']['reason']['cancelled'] = $dictionaryRepo->get('reason', 'cancelled');
