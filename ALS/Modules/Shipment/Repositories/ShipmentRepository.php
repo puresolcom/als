@@ -44,6 +44,12 @@ class ShipmentRepository extends BaseRepository
             'shipment_reason_name' => $shipment['shipment_reason']['value'] ?? '',
         ];
 
+        $shipment['shipment_status'] = [
+            'shipment_status_id'   => $shipment['shipment_status']['id'] ?? '',
+            'shipment_status_key'  => $shipment['shipment_status']['key'] ?? '',
+            'shipment_status_name' => $shipment['shipment_status']['value'] ?? '',
+        ];
+
         $dictionaryRepo = $this->app->make(DictionaryRepository::class);
 
         foreach ($relations as $relation) {
