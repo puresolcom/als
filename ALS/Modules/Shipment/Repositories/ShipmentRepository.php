@@ -39,6 +39,11 @@ class ShipmentRepository extends BaseRepository
             throw new \Exception('Record cannot be found');
         }
 
+        $shipment['shipment_reason'] = [
+            'shipment_reason_id'   => $shipment['shipment_reason']['id'],
+            'shipment_reason_name' => $shipment['shipment_reason']['value'],
+        ];
+
         $dictionaryRepo = $this->app->make(DictionaryRepository::class);
 
         foreach ($relations as $relation) {
