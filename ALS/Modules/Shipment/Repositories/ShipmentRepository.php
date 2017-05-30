@@ -40,8 +40,8 @@ class ShipmentRepository extends BaseRepository
         }
 
         $shipment['shipment_reason'] = [
-            'shipment_reason_id'   => $shipment['shipment_reason']['id'],
-            'shipment_reason_name' => $shipment['shipment_reason']['value'],
+            'shipment_reason_id'   => $shipment['shipment_reason']['id'] ?? '',
+            'shipment_reason_name' => $shipment['shipment_reason']['value'] ?? '',
         ];
 
         $dictionaryRepo = $this->app->make(DictionaryRepository::class);
