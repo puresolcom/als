@@ -49,6 +49,10 @@ $app->singleton(Illuminate\Contracts\Console\Kernel::class, ALS\Console\Kernel::
 |
 */
 
+$app->middleware([
+    \ALS\Http\Middleware\CorsMiddleware::class,
+]);
+
 $app->routeMiddleware([
     'auth' => \ALS\Http\Middleware\Authenticate::class,
     'role' => \ALS\Core\Authorization\Middleware\RoleMiddleware::class,
@@ -65,6 +69,7 @@ $app->routeMiddleware([
 |
 */
 $app->register(Prettus\Repository\Providers\LumenRepositoryServiceProvider::class);
+$app->register(\ALS\Providers\CatchAllOptionsRequestsProvider::class);
 $app->register(\ALS\Providers\AppServiceProvider::class);
 $app->register(\ALS\Providers\AuthServiceProvider::class);
 $app->register(\ALS\Core\Authorization\AuthorizationServiceProvider::class);

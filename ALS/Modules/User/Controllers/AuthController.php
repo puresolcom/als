@@ -40,7 +40,8 @@ class AuthController extends Controller
      *
      * @route user/auth/login [POST]
      *
-     * @param Request $request
+     * @param Request          $request
+     * @param OptionRepository $optionRepo
      *
      * @return \Illuminate\Http\Response
      */
@@ -76,12 +77,7 @@ class AuthController extends Controller
         $jwtEncryptionAlg      = $optionRepo->get('auth', 'jwt_encryption_algo')->value;
 
         // Generate JWT token
-        $token = [
-            'exp'  => time() + $tokenExpirationPeriod,
-            'data' => [
-                'user_id' => $userInstance->id,
-            ],
-        ];
+        $token = ['exp' => time() + $tokenExpirationPeriod, 'data' => ['user_id' => $userInstance->id]];
 
         $jwt = JWT::encode($token, $jwtKey, $jwtEncryptionAlg);
 
@@ -95,10 +91,9 @@ class AuthController extends Controller
 
         // Saving token into transient table
         try {
-            $this->transientRepo->create([
-                'key'        => $userInstance->id,
-                'value'      => $jwt,
-                'expired_at' => Carbon::now()->addSeconds($tokenExpirationPeriod),
+            $this->transientRepo->create(['key'        => $userInstance->id,
+                                          'value'      => $jwt,
+                                          'expired_at' => Carbon::now()->addSeconds($tokenExpirationPeriod),
             ]);
         } catch (\Exception $e) {
             return $this->jsonResponse(null, 'Unable to log you in, please try again', 400, $e->getMessage());
