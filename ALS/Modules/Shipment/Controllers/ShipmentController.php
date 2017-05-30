@@ -62,7 +62,7 @@ class  ShipmentController extends Controller
             return $this->jsonResponse(null, $e->getMessage(), 400);
         }
 
-        return $this->jsonResponse($data);
+        return $this->jsonResponse($data, 'Success');
     }
 
     /**
