@@ -3,16 +3,10 @@
 namespace ALS\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Laravel\Lumen\Application;
 
 abstract class ModuleServiceProvider extends ServiceProvider
 {
     static $routesPaths = [];
-
-    /**
-     * @var Application
-     */
-    protected $app;
 
     public function register()
     {
@@ -21,8 +15,7 @@ abstract class ModuleServiceProvider extends ServiceProvider
 
     protected function registerRoutes()
     {
-        $app = $this->app;
-        $app->group([
+        $this->app->group([
             'prefix'    => strtolower($this->getModuleName()),
             'namespace' => 'ALS\\Modules\\'.$this->getModuleName().'\\Controllers',
         ], function ($app) {

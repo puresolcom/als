@@ -11,22 +11,4 @@ class OptionRepository extends BaseRepository
     {
         return Option::class;
     }
-
-    /**
-     * Fetch option by module and/or key
-     *
-     * @param $module
-     * @param $key
-     *
-     * @return mixed
-     */
-    public function get($module, $key = null)
-    {
-        $filter = ['module' => $module];
-        if (! is_null($key)) {
-            $filter['key'] = $key;
-        }
-
-        return $this->findWhere($filter)->first();
-    }
 }

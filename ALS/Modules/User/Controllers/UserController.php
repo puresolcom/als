@@ -2,9 +2,8 @@
 
 namespace ALS\Modules\User\Controllers;
 
-use ALS\Core\Http\Request;
 use ALS\Http\Controllers\Controller;
-use ALS\Modules\User\Repositories\UserRepository;
+use ALS\Modules\User\Services\User;
 
 /**
  * Class UserController
@@ -14,13 +13,13 @@ use ALS\Modules\User\Repositories\UserRepository;
 class UserController extends Controller
 {
     /**
-     * @var UserRepository
+     * @var User $userService
      */
-    protected $userRepo;
+    protected $userService;
 
-    public function __construct(UserRepository $userRepository)
+    public function __construct()
     {
-        $this->userRepo = $userRepository;
+        $this->userService = app('user');
     }
 
     /**
@@ -28,25 +27,24 @@ class UserController extends Controller
      *
      * @route /user/summary/{userID},/user/{userID}/summary, /user/summary
      *
-     * @param \ALS\Core\Http\Request $request
-     * @param null                   $userID
+     * @param null $userID
      *
      * @return \Illuminate\Http\Response
      */
-    public function summary(Request $request, $userID = null)
+    public function summary($userID = null)
     {
         $isDriver = app('auth')->user()->hasRole('drivers');
         // Getting the driver instance
         if (is_null($userID) && $isDriver) {
             $driver = app('auth')->user();
         } elseif (is_int($userID)) {
-            $driver = $this->userRepo->find($userID);
+            $driver = $this->userService->find($userID);
         }
 
         if (! isset($driver)) {
             return $this->jsonResponse(null, 'Invalid driver ID', 400);
         }
 
-        dd($this->userRepo->getDriverSummary($driver->id, $isDriver)->toArray());
+        dd($this->userService->getDriverSummary($driver->id, $isDriver)->toArray());
     }
 }

@@ -16,24 +16,4 @@ class DictionaryRepository extends BaseRepository
     {
         return Dictionary::class;
     }
-
-    /**
-     * Get Dictionary Records filtered by type and key
-     *
-     * @param string      $type
-     * @param string|null $key
-     *
-     * @return mixed
-     */
-    public function get(string $type, string $key = null)
-    {
-        $where         = [];
-        $where['type'] = $type;
-
-        if (null !== $key) {
-            $where['key'] = $key;
-        }
-
-        return $this->findWhere($where);
-    }
 }

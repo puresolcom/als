@@ -5,7 +5,6 @@ namespace ALS\Modules\Shipment\Controllers;
 use ALS\Core\Authorization\Exceptions\UnauthorizedAccess;
 use ALS\Core\Http\Request;
 use ALS\Http\Controllers\Controller;
-use ALS\Modules\Shipment\Repositories\ShipmentRepository;
 
 /**
  * Class ShipmentController
@@ -14,16 +13,6 @@ use ALS\Modules\Shipment\Repositories\ShipmentRepository;
  */
 class  ShipmentController extends Controller
 {
-    /**
-     * @var ShipmentRepository
-     */
-    protected $shipmentRepo;
-
-    public function __construct(ShipmentRepository $shipmentRepo)
-    {
-        $this->shipmentRepo = $shipmentRepo;
-    }
-
     /**
      * Get Shipments
      *
@@ -36,7 +25,7 @@ class  ShipmentController extends Controller
     public function get(Request $request)
     {
         try {
-            return $this->jsonResponse($this->shipmentRepo->getDriverShipments($request->getRelations(), $request->getFilters()));
+            return $this->jsonResponse(app('shipment')->getDriverShipments($request->getRelations(), $request->getFilters()));
         } catch (\Exception $e) {
             return $this->jsonResponse(null, $e->getMessage(), $e->getCode() ?? 400);
         }
@@ -54,7 +43,7 @@ class  ShipmentController extends Controller
     public function getSingle($id = null)
     {
         try {
-            $data = $this->shipmentRepo->getShipmentWithDriverAndDropdowns($id);
+            $data = app('shipment')->getShipmentWithDriverAndDropdowns($id);
             if (! app('auth')->user()->hasRole('manage-driver') && ! app('auth')->user()->owns($data['shipment_data'], 'emp_driver_id')) {
                 throw new UnauthorizedAccess();
             }
@@ -77,7 +66,7 @@ class  ShipmentController extends Controller
     public function list(Request $request)
     {
         try {
-            $restQuery = $this->shipmentRepo->restQueryBuilder($request->getFields(), $request->getFilters(), $request->getSort(), $request->getRelations(), $request->getPerPage(), 'shipments');
+            $restQuery = app('shipment')->restQueryBuilder($request->getFields(), $request->getFilters(), $request->getSort(), $request->getRelations(), $request->getPerPage(), 'shipments');
         } catch (\Exception $e) {
             return $this->jsonResponse(null, 'Request Failed', 400, $e->getMessage());
         }
