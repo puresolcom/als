@@ -18,7 +18,7 @@ class AuthController extends Controller
      */
     protected $userAuthenticationService;
 
-    public function __construct($userAuthenticationService)
+    public function __construct()
     {
         $this->userAuthenticationService = app('user.authentication');
     }
@@ -65,7 +65,6 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-
         $logOutAll           = $request->get('all') ?? false;
         $authenticationToken = $request->header('Authorization');
 

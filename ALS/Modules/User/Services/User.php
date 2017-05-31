@@ -2,7 +2,7 @@
 
 namespace ALS\Modules\User\Services;
 
-use ALS\Core\Eloquent\Model;
+use ALS\Modules\Expense\Services\Expense;
 use ALS\Modules\Shipment\Repositories\ShipmentRepository;
 use ALS\Modules\User\Repositories\UserRepository;
 use Laravel\Lumen\Application;
@@ -45,7 +45,7 @@ class User
      * @param int  $driverID
      * @param bool $isDriver
      *
-     * @return Model|null
+     * @return array|null
      */
     public function getDriverSummary($driverID, $isDriver = false)
     {
@@ -93,8 +93,66 @@ class User
             $where[] = ['verified_by', '!=', null];
         }
 
-        $results = $shipmentRepo->rawWhere($query, $where);
+        $shipmentSummaryResult = $shipmentRepo->rawWhere($query, $where)->first()->toArray();
+        $expensesSummary       = $this->getExpensesSummary($driverReport->id);
 
-        return $results->first();
+        return $this->formatSummary(array_merge($shipmentSummaryResult, $expensesSummary));
+    }
+
+    /**
+     * Get Expenses Summary
+     *
+     * @param $driverReportID
+     *
+     * @return array
+     */
+    protected function getExpensesSummary($driverReportID)
+    {
+        /** @var Expense $expenseService */
+        $expenseService = $this->app->make('expense');
+        $reportExpenses = $expenseService->getByReportID($driverReportID)->toArray();
+
+        $totalExpenses    = 0;
+        $totalExpensesSum = number_format(0, 2, '.', '');
+
+        if ($reportExpenses) {
+            $totalExpenses    = count($reportExpenses);
+            $totalExpensesSum = number_format(array_sum(array_column($reportExpenses, 'amount')), 2, '.', '');
+        }
+
+        return [
+            'total_expenses_count' => $totalExpenses,
+            'total_expenses_sum'   => $totalExpensesSum,
+        ];
+    }
+
+    protected function formatSummary($result)
+    {
+        if (! $result) {
+            return null;
+        }
+
+        return [
+            'active'               => $result['total'],
+            'delivered'            => $result['delivered'],
+            'verified'             => $result['verified'],
+            'picked'               => $result['picked'],
+            'pending'              => ( string ) ($result['total'] - ($result['delivered'] + $result['picked'] + $result['cancelled'])),
+            'cancelled'            => $result['cancelled'],
+            'total_pick'           => $result['pick_shipment_count'],
+            'total_drop'           => $result['drop_shipment_count'],
+            'addressed_orders'     => ( string ) ($result['delivered'] + $result['picked'] + $result['cancelled']),
+            'newly_assigned'       => ( string ) ($result['total'] - ($result['delivered'] + $result['picked'] + $result['pending'] + $result['cancelled'])),
+            'sum_collected'        => [
+                'total' => $result['amount_collected'],
+                'CAOD'  => $result['cod'],
+                'CCOD'  => $result['ccod'],
+            ],
+            'collection_amount'    => number_format($result['amount_order_to_collect'], 2, '.', ''),
+            'total_order_sum'      => number_format($result['order_amount'], 2, '.', ''),
+            'total_expenses_count' => $result['total_expenses_count'],
+            'total_expenses_sum'   => $result['total_expenses_sum'],
+            'deposit_amount'       => number_format((number_format($result['cod'], 2, '.', '') - $result['total_expenses_sum']), 2, '.', ''),
+        ];
     }
 }

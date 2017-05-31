@@ -5,6 +5,7 @@ namespace ALS\Modules\Shipment\Controllers;
 use ALS\Core\Authorization\Exceptions\UnauthorizedAccess;
 use ALS\Core\Http\Request;
 use ALS\Http\Controllers\Controller;
+use ALS\Modules\Shipment\Services\Shipment;
 
 /**
  * Class ShipmentController
@@ -13,6 +14,16 @@ use ALS\Http\Controllers\Controller;
  */
 class  ShipmentController extends Controller
 {
+    /**
+     * @var Shipment $shipmentService ;
+     */
+    protected $shipmentService;
+
+    public function __construct()
+    {
+        $this->shipmentService = app('shipment');
+    }
+
     /**
      * Get Shipments
      *
@@ -25,10 +36,12 @@ class  ShipmentController extends Controller
     public function get(Request $request)
     {
         try {
-            return $this->jsonResponse(app('shipment')->getDriverShipments($request->getRelations(), $request->getFilters()));
+            $result = $this->shipmentService->getDriverShipments($request->getRelations(), $request->getFilters());
         } catch (\Exception $e) {
             return $this->jsonResponse(null, $e->getMessage(), $e->getCode() ?? 400);
         }
+
+        return $this->jsonResponse($result);
     }
 
     /**
@@ -43,15 +56,15 @@ class  ShipmentController extends Controller
     public function getSingle($id = null)
     {
         try {
-            $data = app('shipment')->getShipmentWithDriverAndDropdowns($id);
-            if (! app('auth')->user()->hasRole('manage-driver') && ! app('auth')->user()->owns($data['shipment_data'], 'emp_driver_id')) {
+            $result = $this->shipmentService->getShipmentWithDriverAndDropdowns($id);
+            if (! app('auth')->user()->hasRole('manage-driver') && ! app('auth')->user()->owns($result['shipment_data'], 'emp_driver_id')) {
                 throw new UnauthorizedAccess();
             }
         } catch (\Exception $e) {
             return $this->jsonResponse(null, $e->getMessage(), 400);
         }
 
-        return $this->jsonResponse($data, 'Success');
+        return $this->jsonResponse($result, 'Success');
     }
 
     /**
@@ -66,7 +79,7 @@ class  ShipmentController extends Controller
     public function list(Request $request)
     {
         try {
-            $restQuery = app('shipment')->restQueryBuilder($request->getFields(), $request->getFilters(), $request->getSort(), $request->getRelations(), $request->getPerPage(), 'shipments');
+            $restQuery = $this->shipmentService->restQueryBuilder($request->getFields(), $request->getFilters(), $request->getSort(), $request->getRelations(), $request->getPerPage(), 'shipments');
         } catch (\Exception $e) {
             return $this->jsonResponse(null, 'Request Failed', 400, $e->getMessage());
         }

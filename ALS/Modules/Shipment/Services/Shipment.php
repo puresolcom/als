@@ -3,6 +3,7 @@
 namespace ALS\Modules\Shipment\Services;
 
 use ALS\Modules\Shipment\Repositories\ShipmentRepository;
+use ALS\Modules\User\Services\User;
 use Carbon\Carbon;
 use Laravel\Lumen\Application;
 
@@ -25,6 +26,29 @@ class Shipment
     {
         $this->app          = $app;
         $this->shipmentRepo = $shipmentRepo;
+    }
+
+    /**
+     * Prepares a restful query
+     *
+     * @param null   $fields
+     * @param null   $filters
+     * @param null   $sort
+     * @param null   $relations
+     * @param int    $limit
+     * @param string $dataKey
+     *
+     * @return mixed
+     */
+    public function restQueryBuilder(
+        $fields = null,
+        $filters = null,
+        $sort = null,
+        $relations = null,
+        $limit = null,
+        $dataKey = 'data'
+    ) {
+        return $this->shipmentRepo->restQueryBuilder($fields, $filters, $sort, $relations, $limit, $dataKey);
     }
 
     /**
@@ -229,6 +253,9 @@ class Shipment
                 ],
             ];
         } else {
+            if (! is_array($requestFilters)) {
+                throw new \Exception('Request filters has to be set', 400);
+            }
             $driver = $this->getDriverFromRequestFilter($requestFilters, $userService);
         }
 
@@ -254,7 +281,7 @@ class Shipment
         if ($driverReport->status->id == $reportAcknowledgedStatus->id && app('auth')->user()->hasRole('manage-driver')) {
             throw new \Exception('Report is in acknowledged status', 200);
         }
-        $restQueryResult = $this->restQueryDriverShipments(null, $filters, null, $relations, 1000, 'shipments');
+        $restQueryResult = $this->restQueryDriverShipments(null, $filters, null, $relations, 0, 'shipments');
         $data            = array_merge($data, $restQueryResult);
 
         return $data;
@@ -263,13 +290,13 @@ class Shipment
     /**
      * Get driver instance using the id from request filter
      *
-     * @param $requestFilters
-     * @param $userService
+     * @param array $requestFilters
+     * @param User  $userService
      *
      * @return mixed
      * @throws \Exception
      */
-    protected function getDriverFromRequestFilter($requestFilters, $userService)
+    protected function getDriverFromRequestFilter(array $requestFilters, $userService)
     {
         $driverID = null;
         if (in_array('driver_id', array_values(array_column($requestFilters, 'field')))) {

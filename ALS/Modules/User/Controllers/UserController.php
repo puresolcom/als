@@ -45,6 +45,12 @@ class UserController extends Controller
             return $this->jsonResponse(null, 'Invalid driver ID', 400);
         }
 
-        dd($this->userService->getDriverSummary($driver->id, $isDriver)->toArray());
+        $summaryResult = $this->userService->getDriverSummary($driver->id, $isDriver);
+
+        if (! $summaryResult) {
+            return $this->jsonResponse(null, 'Summary does not exist', 400);
+        }
+
+        return $this->jsonResponse($summaryResult, 'Driver summary processed');
     }
 }

@@ -15,7 +15,8 @@ trait RestfulValidateTrait
         $validator = $this->getValidationFactory()->make($request->all(), $rules, $messages, $customAttributes);
 
         if ($validator->fails()) {
-            return $this->jsonResponse(null, 'Error Occurred while validating you input', 400, $validator->getMessageBag()->all())->send();
+            $this->jsonResponse(null, 'Error Occurred while validating your input', 400, $validator->getMessageBag()->all())->send();
+            die;
         }
     }
 }

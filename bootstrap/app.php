@@ -78,6 +78,7 @@ $app->register(\ALS\Core\Authorization\AuthorizationServiceProvider::class);
 $app->register(\ALS\Modules\User\Providers\ModuleServiceProvider::class);
 $app->register(\ALS\Modules\Option\Providers\ModuleServiceProvider::class);
 $app->register(\ALS\Modules\Shipment\Providers\ModuleServiceProvider::class);
+$app->register(\ALS\Modules\Expense\Providers\ModuleServiceProvider::class);
 
 /*
 |--------------------------------------------------------------------------
