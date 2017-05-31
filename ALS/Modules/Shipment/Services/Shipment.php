@@ -211,13 +211,14 @@ class Shipment
      *
      * @param $requestRelations
      * @param $requestFilters
+     * @param $requestSort
      *
      * @deprecated 1.1 Old API Helper
      *
      * @return array
      * @throws \Exception
      */
-    public function getDriverShipments($requestRelations, $requestFilters)
+    public function getDriverShipments($requestRelations, $requestFilters, $requestSort)
     {
         // Preparing services and repositories
         $dictionaryService = $this->app->make('dictionary');
@@ -284,7 +285,7 @@ class Shipment
         if ($driverReport->status->id == $reportAcknowledgedStatus->id && app('auth')->user()->hasRole('manage-driver')) {
             throw new \Exception('Report is in acknowledged status', 200);
         }
-        $restQueryResult = $this->restQueryDriverShipments(null, $filters, null, $relations, 99999, 'shipments');
+        $restQueryResult = $this->restQueryDriverShipments(null, $filters, $requestSort, $relations, 99999, 'shipments');
         $data            = array_merge($data, $restQueryResult);
 
         return $data;

@@ -36,7 +36,7 @@ class  ShipmentController extends Controller
     public function get(Request $request)
     {
         try {
-            $result = $this->shipmentService->getDriverShipments($request->getRelations(), $request->getFilters());
+            $result = $this->shipmentService->getDriverShipments($request->getRelations(), $request->getFilters(), $request->getSort());
         } catch (\Exception $e) {
             return $this->jsonResponse(null, $e->getMessage(), $e->getCode() ?? 400);
         }
