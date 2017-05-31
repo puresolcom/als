@@ -105,25 +105,42 @@ class Request extends \Illuminate\Http\Request
         if (! $this->has('sort')) {
             return null;
         }
+
         $sort       = $this->get('sort');
         $parsedSort = array_filter(explode(',', $sort));
+        $result     = array_map(function ($sort) {
 
-        $result = array_map(function ($sort) {
+            $relational   = false;
+            $relationName = null;
+            $orderBy      = null;
 
-            $orderBy = null;
+            if (strpos($sort, '.') !== false) {
+                $relational        = true;
+                $relationFragments = explode('.', $sort);
+                $orderBy           = array_pop($relationFragments);
+                $relationName      = implode('.', $relationFragments);
+            }
+
             if (strpos($sort, '!', 0) === 0) {
-                $orderBy   = substr($sort, 1);
+                if ($relational) {
+                    // Removing from the relationName
+                    $relationName = substr($relationName, 1);
+                } else {
+                    // Removing the "!"
+                    $orderBy = substr($orderBy, 1);
+                }
                 $direction = 'DESC';
-            } elseif (strpos($sort, ':') !== false) {
-                list($orderBy, $direction) = explode(':', $sort);
+            } elseif (strpos($orderBy, ':') !== false) {
+                list($orderBy, $direction) = explode(':', $orderBy);
             } else {
-                $orderBy   = $sort;
                 $direction = 'ASC';
             }
 
             return [
-                'orderBy'   => $orderBy,
-                'direction' => $direction,
+                'relational'   => $relational,
+                'relationName' => $relationName,
+                'orderBy'      => $orderBy,
+                'direction'    => $direction,
             ];
         }, $parsedSort);
 

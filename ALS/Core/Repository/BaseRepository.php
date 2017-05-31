@@ -211,7 +211,13 @@ abstract class BaseRepository extends \Prettus\Repository\Eloquent\BaseRepositor
         // Preparing Sorting
         if (is_array($sort)) {
             foreach ($sort as $order) {
-                $results->orderBy($order['orderBy'], $order['direction']);
+                if (isset($order['relational']) && true === $order['relational']) {
+                    $results->whereHas($order['relationName'], function ($query) use ($order) {
+                        return $query->orderBy($order['orderBy'], $order['direction']);
+                    });
+                } else {
+                    $results->orderBy($order['orderBy'], $order['direction']);
+                }
             }
         }
 

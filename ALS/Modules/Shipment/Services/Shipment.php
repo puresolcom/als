@@ -285,7 +285,23 @@ class Shipment
         if ($driverReport->status->id == $reportAcknowledgedStatus->id && app('auth')->user()->hasRole('manage-driver')) {
             throw new \Exception('Report is in acknowledged status', 200);
         }
-        $restQueryResult = $this->restQueryDriverShipments(null, $filters, $requestSort, $relations, 99999, 'shipments');
+
+        // Override sorting case of (location_id, status_id)
+        $sort = [];
+        foreach ($requestSort as $i => $order) {
+            switch ($order['orderBy']) {
+                case 'location_id':
+                    $order['orderBy'] = 'location.name';
+                    $sort[]           = $order;
+                    break;
+                case 'status_id':
+                    $order['orderBy'] = 'status.key';
+                    $sort[]           = $order;
+                    break;
+            }
+        }
+        
+        $restQueryResult = $this->restQueryDriverShipments(null, $filters, $sort, $relations, 99999, 'shipments');
         $data            = array_merge($data, $restQueryResult);
 
         return $data;
