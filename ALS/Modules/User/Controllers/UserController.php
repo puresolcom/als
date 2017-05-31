@@ -37,7 +37,7 @@ class UserController extends Controller
         // Getting the driver instance
         if (is_null($userID) && $isDriver) {
             $driver = app('auth')->user();
-        } elseif (is_int($userID)) {
+        } elseif (is_numeric($userID)) {
             $driver = $this->userService->find($userID);
         }
 
