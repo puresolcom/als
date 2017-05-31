@@ -219,6 +219,7 @@ class Shipment
      */
     public function getDriverShipments($requestRelations, $requestFilters)
     {
+        // Preparing services and repositories
         $dictionaryService = $this->app->make('dictionary');
         $userService       = $this->app->make('user');
         $reportService     = $this->app->make('report');
@@ -239,6 +240,7 @@ class Shipment
 
         $customFilters = [];
 
+        // Custom drivers only filters
         if ($this->app->make('auth')->user()->hasRole('drivers')) {
             $driver        = $this->app->make('auth')->user();
             $customFilters = [
@@ -259,6 +261,7 @@ class Shipment
             $driver = $this->getDriverFromRequestFilter($requestFilters, $userService);
         }
 
+        // General Filters
         $todayBeginDate    = Carbon::today()->format('Y-m-d H:i:s');
         $tomorrowBeginDate = Carbon::tomorrow()->format('Y-m-d H:i:s');
         $customFilters[]   = ['field' => 'updated_at', 'compare' => '>', 'value' => $todayBeginDate];
@@ -281,7 +284,7 @@ class Shipment
         if ($driverReport->status->id == $reportAcknowledgedStatus->id && app('auth')->user()->hasRole('manage-driver')) {
             throw new \Exception('Report is in acknowledged status', 200);
         }
-        $restQueryResult = $this->restQueryDriverShipments(null, $filters, null, $relations, 0, 'shipments');
+        $restQueryResult = $this->restQueryDriverShipments(null, $filters, null, $relations, 99999, 'shipments');
         $data            = array_merge($data, $restQueryResult);
 
         return $data;
